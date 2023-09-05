@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 19 Aug 2023
+# last updated: 5 Sep 2023
 # author: Andreas Uthemann
 
 
@@ -9,7 +9,8 @@ SampleTypes <- function(y, paras, ord, p_class, M){
   # and corresponding states space models of order "ord" given parameters "paras" in list "models"
   # types[m,s] = 1 : submitter s for draw m is weak (0 if strong)
   # models[[ind.mod[m]]] : state space model for draw m (vector ind_mod of length M maps draw m to corresponding state space model) 
-  
+  # (Return dimension M can be smaller than initial M if type draws are duplicated)
+
   source("FKFModel2_demeaned_Lagged_pubpriv_heterogenous.R")   # function that creates matrices for state space model
   source("InitialParasGuess.R")   # function used to initialize priors for state
   
@@ -45,9 +46,11 @@ SampleTypes <- function(y, paras, ord, p_class, M){
   types_0 <- init$weak   # types_0[i] == TRUE if submitter i is classified as weak using kmeans clustering on ts stddev of submissions
   types <- matrix(NA, nrow = M, ncol = S)
   for (s in 1:S){
-    q <- ifelse(types_0[s], 1, 1 - p_class)  # if s is classed as weak, P(type_s == 1) = 1 - p_class, if strong then P(type_s == 1) = p_class > 1/2
+    q <- ifelse(types_0[s], p_class, 1 - p_class)  # if s is classed as weak, P(type_s == 1) = 1 - p_class, if strong then P(type_s == 1) = p_class > 1/2
     types[,s] = rbinom(M, 1, q)
   }
+
+  types <- unique(types)  # remove duplicate rows
   
   ###################################  2. CREATE STATE SPACE MODELS  ####################################
   
