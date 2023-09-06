@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 28 Aug 2023
+# last updated: 6 Sep 2023
 # author: Andreas Uthemann
 
 rm(list=ls())
@@ -41,7 +41,16 @@ y_sim <- SimulateDataLagged(S = S, W = W, TT = TT, rho = paras_sim[1],
                             sig_e = paras_sim[4], sig_n = paras_sim[5], 
                             sig_z = paras_sim[6], ord = ord_sim, seed = seed_sim)
 
-save(y_sim, paras_sim, seed_sim, file = "data/simdata_paraset1.RData")
+# introduce missing values (optional)
+p_miss <- 0.01   # percent of missing observation per submitter
+miss <- rbinom(S*TT, 1, p_miss)
+miss <- matrix(as.logical(miss), nrow = S)
+
+for (s in 1:40){
+  y_sim[(s+1), miss[s, ]] <- NA
+}
+
+#save(y_sim, paras_sim, seed_sim, file = "data/simdata_paraset1_NAs.RData")
 
 # calculate log-likelihood at true parameters (mostly test)
 M_mkf <- 50000 # types draws for MKF
@@ -83,8 +92,8 @@ scale_mcmc[4,4] <- 0.04  # sig_e
 scale_mcmc[5,5] <- 0.025 # sig_n
 scale_mcmc[6,6] <- 0.005 # sig_z
 
-nbatch_mcmc <- 5000
-burnin_mcmc <- 1000
+nbatch_mcmc <- 1000
+burnin_mcmc <- 200
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
@@ -127,6 +136,6 @@ results_mcmc <- list(out_mcmc, paras_sim, paras_est, paras_est_se,
 names(results_mcmc) <- c("out_mcmc", "paras_sim", "paras_est", "paras_est_se",
                          "seed", "scale_mcmc")
 
-outfile <- paste0("results_mcmc_simdata_paraset1_scale6_seed", seed_sim, ".RData")
+outfile <- paste0("results_mcmc_simdata_NAs_paraset1_scale6_seed", seed_sim, ".RData")
 path_out <- "results/"
 save(results_mcmc, file = paste0(path_out, outfile))
