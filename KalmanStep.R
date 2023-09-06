@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 20 Aug May 2023
+# last updated: 6 Sep 2023
 # author: Andreas Uthemann
 
 # function calculates Kalman updating step for a given prior for state vector (at, Pt) and log sample weight for a given sample path (ln.wt) given new observation (yt)
@@ -13,21 +13,21 @@ KalmanStep <- function(yt, ln_wt, at, Pt, LL, dt, Tt, HHt, ct, Zt, GGt){
   
   # Adjusting for missing observation in yt:
   # modify observation equation yt = ct + Zt alpha_t + Ht eta_t with eta_t ~ N(0,I_m) for missing observations in yt
-  # WWt is a selection matrix of dim(yt). Starting from an identity matrix, if yt(j) is missing, row j of WWt is replaced with all zeros. 
+  # WWt is a selection matrix of dim(yt). Starting from an identity matrix, if yt(j) is missing, row j of WWt is deleted. 
   # New observation equation is yt* = Zt* alpha_t + Gt* eta_t with yt* = WWt yt, Zt* = WWt Zt and Gt* = WWt Gt (implying GGt* = WWt GGt WWt')
   
   #library(mvtnorm)  # only used for density of multivariate normal when updating weights
   
   if (anyNA(yt)){
     
-    WWt <- diag(S + 1)
-    for (j in 1:(S + 1)){
-      if (is.na(yt[j])){
-        WWt[j, j] <- 0
-      }
-    }
+    miss <- is.na(yt)
     
-    yt <- yt[!is.na(yt)]
+    WWt <- diag(length(yt))
+    WWt <- WWt[which(!miss),]
+    
+    yt <- yt[!miss]
+    ct <- ct[!miss]
+    
     Zt <- WWt %*% Zt
     GGt <- WWt %*% GGt %*% t(WWt)
   }

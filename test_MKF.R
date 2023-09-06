@@ -25,7 +25,7 @@ rho_sim <- 0.94
 omega_sim <- 0.33 # probability of weak submitter
 sig_u_sim <- 0.09
 sig_e_sim <- 0.01
-sig_n_sim <- 0.01  # 0.09 works fine
+sig_n_sim <- 0.09  # 0.09 works fine
 sig_z_sim <- 0.01
 
 paras_sim <- c(rho_sim, omega_sim, sig_u_sim, sig_e_sim, sig_n_sim, sig_z_sim)
@@ -127,6 +127,6 @@ results_mcmc <- list(out_mcmc, paras_sim, paras_est, paras_est_se,
 names(results_mcmc) <- c("out_mcmc", "paras_sim", "paras_est", "paras_est_se",
                          "seed", "scale_mcmc")
 
-outfile <- paste0("results_mcmc_simdata_paraset2_scale6_seed", seed_sim, ".RData")
+outfile <- paste0("results_mcmc_simdata_paraset1_scale6_seed", seed_sim, ".RData")
 path_out <- "results/"
 save(results_mcmc, file = paste0(path_out, outfile))
