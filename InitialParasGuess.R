@@ -1,12 +1,14 @@
 # first created: 30 Apr 2023
-# last updated: 6 Sep 2023
+# last updated: 28 Sep 2023
 # author: Andreas Uthemann
 
-InitialParas <- function(y){
+InitialParas <- function(y, seed=1){
 
   # IntialParas(y) returns an initial guess for model parameters based on moments of submission data y
   # (can be used to pick initial value for optimization routine and to set "reasonable" priors (a0,P0) for the initial state)
   
+  set.seed(seed)
+
   S <- dim(y)[1] - 1  # number of submitters
   TT <- dim(y)[2]     # number of submission periods
   

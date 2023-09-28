@@ -1,8 +1,8 @@
 # first created: 20 Aug 2023
-# last updated: 20 Aug 2023
+# last updated: 28 Sep 2023
 # author: Andreas Uthemann
 
-ll_mcmc <- function(par, y, ord, p_class, M, l, h){
+ll_mcmc <- function(par, y, init, types, ord, l, h){
   # transform parameters to unconstrained problem
   # see mcmc R package pdf for logic of ifelse (avoids numerical problems)
   source("LogLike_MKF.R")
@@ -23,7 +23,7 @@ ll_mcmc <- function(par, y, ord, p_class, M, l, h){
   paras[6] <- ifelse(par[6] > 0, (h + l * exp(-par[6])) / (1 + exp(-par[6])),
                      (l + h * exp(par[6])) / (1 + exp(par[6])))
   
-  ll_out <- LogLike_MKF(y = y, paras = paras, p_class = p_class, ord = ord, M = M)
+  ll_out <- LogLike_MKF(y = y, paras = paras, init = init, types = types, ord = ord)
   
   # calculate Jacobian for transformed parameters
   # (see https://stats.stackexchange.com/questions/330402/what-is-an-example-of-a-transformation-on-a-posterior-distribution-such-that-the )

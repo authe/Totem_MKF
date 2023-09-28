@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 6 Sep 2023
+# last updated: 28 Sep 2023
 # author: Andreas Uthemann
 
 rm(list=ls())
@@ -9,7 +9,8 @@ library(tictoc)
 
 source('SimulateData2_demeaned_Lagged_pubpriv_heterogenous.R')
 source('LogLike_MKF.R')
-source("InitialParasGuess.R") 
+source("InitialParasGuess.R")
+source("DrawTypes.R")
 
 # -------------------------- Simulate data for testing ------------------------
 
@@ -52,12 +53,19 @@ for (s in 1:40){
 
 #save(y_sim, paras_sim, seed_sim, file = "data/simdata_paraset1_NAs.RData")
 
+# data-driven guesses for parameters and submitter types
+init <- InitialParas(y_sim)
+
 # calculate log-likelihood at true parameters (mostly test)
+
 M_mkf <- 50000 # types draws for MKF
 p_class <- 0.9
+crit_eff = 0.2
+types_mkf <- DrawTypes(M_mkf, init, p_class)
+
 tic()
-LL <- LogLike_MKF(y = y_sim, paras = paras_sim, ord = ord_sim, 
-                  p_class = p_class, M = M_mkf)
+LL <- LogLike_MKF(y = y_sim, paras = paras_sim, init = init, 
+                  types = types_mkf, ord = ord_sim, crit_eff = crit_eff)
 toc()
 
 # -----------------------------------------------------------------------------
@@ -71,14 +79,17 @@ source("LogLike_MKF_MCMC.R")
 # parameters for Mixed Kalman Filter
 ord <- 2
 p_class <- 0.9
+crit_eff = 0.2
 M <- 50000  # number of draws from types space ( 2^S possible type combinations)
 
 # parameters for parameter rescaling 
 l <- 0  # lower bound for standard deviation parameters (sig.u, sig.e, sig.n, sig.z)
 h <- 5 # upper bound
 
+# draw M types for MKF
+types <- DrawTypes(M_mkf, init, p_class)
+
 # initial values for parameter estimation
-init <- InitialParas(y_sim)
 par_0 <- init$par
 par_0 <- c(log(par_0[1:2] / (1- par_0[1:2])), 
            log((par_0[3:6] - l) / (h - par_0[3:6]))) 
@@ -92,15 +103,15 @@ scale_mcmc[4,4] <- 0.04  # sig_e
 scale_mcmc[5,5] <- 0.025 # sig_n
 scale_mcmc[6,6] <- 0.005 # sig_z
 
-nbatch_mcmc <- 1000
-burnin_mcmc <- 200
+nbatch_mcmc <- 50
+burnin_mcmc <- 10
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
 tic()
 out_mcmc <- metrop(ll_mcmc, initial = par_0, nbatch = nbatch_mcmc, 
-                   scale = scale_mcmc, y = y_sim,ord = ord, 
-                   p_class = p_class,  M = M, l = l, h = h)
+                   scale = scale_mcmc, y = y_sim, init = init, types = types, 
+                   ord = ord, crit_eff = crit_eff, l = l, h = h)
 toc()
 
 # acceptance rate of chain (ideally between 20% to 30%)

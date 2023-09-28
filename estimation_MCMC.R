@@ -1,5 +1,5 @@
 # first created: 20 Aug 2023
-# last updated: 11 Sep 2023
+# last updated: 28 Sep 2023
 # author: Andreas Uthemann
 
 # main program for MCMC estimation of MKF
@@ -15,7 +15,7 @@ set.seed(seed)
 
 ind <- "SPX"
 term <- "12"
-strike <- "100"
+strike <- "150"
 opttyp <- "CE"
 
 path_data <- "data/"
@@ -31,24 +31,29 @@ y_est <- log(ydat)  # panel with lagged consensus IV and submissions
 # log-likelihood for MCMC
 # (fct ll_mcmc accepts unrestricted parameters; original parameters are scaled)
 source("LogLike_MKF_MCMC.R")
+source("DrawTypes.R")
+source("InitialParasGuess.R")
 
 # parameters for Mixed Kalman Filter
 ord <- 2
 p_class <- 0.9
+crit_eff = 0.2
 M <- 50000  # number of draws from types space ( 2^S possible type combinations)
 
-LL_spec <- c(ord, p_class, M)
-names(LL_spec) <- c("ord", "p_class", "M")
+LL_spec <- c(ord, p_class, crit_eff, M)
+names(LL_spec) <- c("ord", "p_class", "crit_eff", "M")
+
+# draw types (M*S matrix)
+init <- InitialParas(y_est)  # init$weak is initial guess for weak/strong
+types <- DrawTypes(M, init, p_class)
+
+# -------------------- set parameters for MCMC estimation ---------------------
 
 # bounds for parameter rescaling 
 l <- 0  # lower bound for stddev parameters (sig.u, sig.e, sig.n, sig.z)
 h <- 1  # upper bound
 
-# -------------------- set parameters for MCMC estimation ---------------------
-
 # initial values for parameter estimation
-source("InitialParasGuess.R")
-init <- InitialParas(y_est)
 par_0 <- init$par
 par_0 <- c(log(par_0[1:2] / (1- par_0[1:2])), 
            log((par_0[3:6] - l) / (h - par_0[3:6]))) 
@@ -70,8 +75,8 @@ burnin_mcmc <- 10
 
 tic()
 out_mcmc <- metrop(ll_mcmc, initial = par_0, nbatch = nbatch_mcmc, 
-                   scale = scale_mcmc, y = y_est, ord = ord, 
-                   p_class = p_class,  M = M, l = l, h = h, )
+                   scale = scale_mcmc, y = y_est, types = types, 
+                   init = init, ord = ord, crit_eff = crit_eff, l = l, h = h)
 toc()
 
 # ---------------------------- process results  -------------------------------

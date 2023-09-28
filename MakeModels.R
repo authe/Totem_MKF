@@ -1,19 +1,17 @@
-# first created: 30 Apr 2023
+# first created: 28 Sep 2023
 # last updated: 28 Sep 2023
 # author: Andreas Uthemann
 
 
-SampleTypes <- function(y, paras, init, ord, p_class, M){
+MakeModels <- function(y, types, paras, init, ord){
   
-  # SampleTypes(y, paras, M) returns M*S matrix "types" containing M i.i.d. draws from the (weak,strong) type space 
-  # and corresponding states space models of order "ord" given parameters "paras" in list "models"
+  # MakeModels(y, types, paras, init, ord) states space models for type draw types
+  # of order "ord" given parameters "paras" in list "models"
   # "init" provides (potentially data-driven) values to set reasonable priors (a0,P0) for the initial state 
-  # types[m,s] = 1 : submitter s for draw m is weak (0 if strong)
   # models[[ind.mod[m]]] : state space model for draw m (vector ind_mod of length M maps draw m to corresponding state space model) 
   # (Return dimension M can be smaller than initial M if type draws are duplicated)
 
   source("FKFModel2_demeaned_Lagged_pubpriv_heterogenous.R")   # function that creates matrices for state space model
-  source("InitialParasGuess.R")   # function used to initialize priors for state
   
   # parameters for state space model
   ord <- ord  # highest order of beliefs
@@ -28,8 +26,6 @@ SampleTypes <- function(y, paras, init, ord, p_class, M){
   sig_z <- paras[6]
   
   
-  ###################   1. SET DATA-DRIVEN PARAMETERS FOR PRIORS AND DRAW TYPES  ##################################################
-  
   # data-based parameter values used to set "reasonable" data-driven priors (a0,P0) for the initial state 
   # Important: paras.0 only depend on data y and do not change with type m or "estimation" parameters paras
   # init <- InitialParas(y)
@@ -41,19 +37,8 @@ SampleTypes <- function(y, paras, init, ord, p_class, M){
   sig_n_0 <- paras_0[5]
   sig_z_0 <- paras_0[6]
   
-  # draw submitter types (weak or strong) for M sample paths
   
-  # types <- matrix(rbinom(M*S,1,omega.0), nrow=M, ncol=S)        # matrix that contains submitter types (weak=1, strong=0) using binomial prior with Pr(tau[i,m] = "weak") = omega.0
-  types_0 <- init$weak   # types_0[i] == TRUE if submitter i is classified as weak using kmeans clustering on ts stddev of submissions
-  types <- matrix(NA, nrow = M, ncol = S)
-  for (s in 1:S){
-    q <- ifelse(types_0[s], p_class, 1 - p_class)  # if s is classed as weak, P(type_s == 1) = 1 - p_class, if strong then P(type_s == 1) = p_class > 1/2
-    types[,s] = rbinom(M, 1, q)
-  }
-
-  types <- unique(types)  # remove duplicate rows
-  
-  ###################################  2. CREATE STATE SPACE MODELS  ####################################
+  ###################################   CREATE STATE SPACE MODELS  ####################################
   
   # create model for W.m weak submitters (unlike for type space (size 2^S), we need at most S different models as the ordering of types does not matter for models since data is rearranged accord to type vector [see below])
   
@@ -87,7 +72,7 @@ SampleTypes <- function(y, paras, init, ord, p_class, M){
                         Zt = ss$Zt, GGt = ss$GGt, W = w, a0 = a0, P0 = P0)
   }
   
-  smp <- list(types = types, models = models, ind_mod = ind_mod)
+  mod <- list(models = models, ind_mod = ind_mod)
   
-  return(smp)
+  return(mod)
 }
