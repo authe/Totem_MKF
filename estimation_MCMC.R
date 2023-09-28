@@ -44,7 +44,7 @@ LL_spec <- c(ord, p_class, crit_eff, M)
 names(LL_spec) <- c("ord", "p_class", "crit_eff", "M")
 
 # draw types (M*S matrix)
-init <- InitialParas(y_est)  # init$weak is initial guess for weak/strong
+init <- InitialParas(y_est, seed = seed)  # init$weak is initial guess for weak/strong
 types <- DrawTypes(M, init, p_class)
 
 # -------------------- set parameters for MCMC estimation ---------------------
