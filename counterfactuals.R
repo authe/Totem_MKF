@@ -3,9 +3,10 @@
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
-# for the following counterfactual experiments:
+# for the counterfactual experiments (1 & 2) and baseline (3):
 # 1. no consensus price
 # 2. consensus price, but the given submitter does not observe it
+# 3. baseline, submitter observes private signal and consensus price
 
 cov_counterfactual <- function(paras, ord, tol=1e-15) {
 
