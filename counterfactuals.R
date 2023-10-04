@@ -1,5 +1,5 @@
 # first created: 1 Oct 2023
-# last updated: 1 Oct 2023
+# last updated: 4 Oct 2023
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
@@ -31,7 +31,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     while (test_convergence && count <= count_max) {
 
         k <- sig2 / (sig2 + sig_n^2)  # Kalman gain
-        sig2_next <- rho^2 * (1-k) * sig2 + sig_u^2 # recursion for variance
+        sig2_next <- rho^2 * (1 - k) * sig2 + sig_u^2 # recursion for variance
 
         dist <- abs(sig2_next - sig2)
         test_convergence <- (dist > tol)
@@ -48,7 +48,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
 
     # 1a. weak submitter
     # signal: s_{i,t} = theta_t + sig_n eta_{i,t}
-    Z <- c(1, 0)
+    Z <- cbind(1, 0)
     H <- sig_n^2
     P0 <- sig2 * diag(2)
 
@@ -62,7 +62,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
 
     # 1b. strong submitter
     # signal: s_{i,t} = theta_t
-    Z <- c(1, 0)
+    Z <- cbind(1, 0)
     H <- 0  # perfect signal
     P0 <- sig2 * diag(2)
 
@@ -85,7 +85,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
 
     # 2a. weak submitter
     # signal: s_{i,t} = theta_t + sig_n eta_{i,t}
-    Z <- c(1, rep(0, ord))
+    Z <- cbind(1, t(rep(0, ord)))
     H <- sig_n^2
     P0 <- sig2 * diag(ord + 1)
 
@@ -100,7 +100,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # 2b. strong submitter
 
     # signal: s_{i,t} = theta_t
-    Z <- c(1, rep(0, ord))
+    Z <- cbind(1, t(rep(0, ord)))
     H <- 0  # perfect signal
     P0 <- sig2 * diag(ord + 1)
 
@@ -116,8 +116,8 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # ------------------------ 3. baseline model  -----------------------------
 
     # 3a. weak submitter (with private signal & consensus price)
-    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
-    cov_weak <- selec %*% ss$PP %*% t(selec)
+    selec <- rbind(c(1, rep(0, ord - 1)), c(1 - omega, omega, rep(0, ord - 2)))
+    cov_weak <- selec %*% ss$PP[1:2, 1:2] %*% t(selec)
 
     # 3b. strong submitter (with private signal & consensus price)
     cov_strong <- diag(2)

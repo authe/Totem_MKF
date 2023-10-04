@@ -14,7 +14,7 @@ covkal_ss <- function(M, N, Z, H, P0, tol=1e-15) {
 
     # update Kalman gain Kt and covariance matrix Pt
     # until convergence to stationary values
-    count_max <- 100
+    count_max <- 1000
     test_convergence <- TRUE
     count <- 0
     Pt <- P0
