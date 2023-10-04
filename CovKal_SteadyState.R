@@ -1,5 +1,5 @@
 # first created: 30 Sep 2023
-# last updated: 30 Sep 2023
+# last updated: 4 Oct 2023
 # author: Andreas Uthemann
 
 # function returns steady state Kalman gains and covariance matrix
