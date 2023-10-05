@@ -43,7 +43,7 @@ covkal_ss <- function(M, N, Z, H, P0, tol=1e-15) {
     }
 
     ss <- list()
-    ss$"cov" <- Pt
+    ss$"cov" <- Ptt # return Var( alpha_t | I_t)
     ss$"kg" <- Kt
 
     return(ss)

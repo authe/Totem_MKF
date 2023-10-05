@@ -1,5 +1,5 @@
 # first created: 1 Oct 2023
-# last updated: 4 Oct 2023
+# last updated: 5 Oct 2023
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
@@ -12,6 +12,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
 
     source("createStateSpaceMat2_Lagged_pubpriv_heterogenous.R")
     source("CovKal_SteadyState.R")
+    source("CovKal_SteadyState_Nimark.R")
 
     rho <- paras[1]
     omega <- paras[2]
@@ -89,7 +90,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     H <- sig_n^2
     P0 <- sig2 * diag(ord + 1)
 
-    # covariance of weak's beliefs for theta_t^(0:1) is aux$cov
+    # covariance of weak's beliefs for theta_t^(0:ord) is aux$cov
     aux <- covkal_ss(M = M, N = N, Z = Z, H = H, P0 = P0, tol = tol)
 
     # average expectation: thetabar_t = (1-omega) theta_t + omega theta_t^1
@@ -104,7 +105,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     H <- 0  # perfect signal
     P0 <- sig2 * diag(ord + 1)
 
-    # covariance of strong's beliefs for theta_t^(0:1) is aux$cov
+    # covariance of strong's beliefs for theta_t^(0:ord) is aux$cov
     aux <- covkal_ss(M = M, N = N, Z = Z, H = H, P0 = P0, tol = tol)
 
     # average expectation: thetabar_t = (1-omega) theta_t + omega theta_t^1
@@ -116,14 +117,33 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # ------------------------ 3. baseline model  -----------------------------
 
     # 3a. weak submitter (with private signal & consensus price)
-    selec <- rbind(c(1, rep(0, ord - 1)), c(1 - omega, omega, rep(0, ord - 2)))
-    cov_weak <- selec %*% ss$PP[1:2, 1:2] %*% t(selec)
+    A <- ss$M
+    C <- ss$N
+    C <- cbind(C, rep(0, ord+1))
+
+    D1 <- rbind(c(1, rep(0, ord)), rep(0, ord + 1))
+    D2 <- rbind(rep(0, ord + 1), c(1 - omega, omega, rep(0, ord - 1)))
+
+    R <- rbind(c(0, 0, sig_n), c(0, sig_e, 0))  # noisy private signal
+
+    P0 <- sig2 * diag(ord + 1)
+
+    # covariance of weak's beliefs for theta_t^(0:ord) is aux$cov
+    aux <- covkal_ss_nimark(A = A, C = C, D1 = D1, D2 = D2, R = R,
+                             P0 = P0, tol = tol)
+
+    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
+    cov_weak <- selec %*% aux$cov %*% t(selec)
 
     # 3b. strong submitter (with private signal & consensus price)
-    cov_strong <- diag(2)
-    cov_strong[1, 1] <- 0  # strong know theta_t^0
-    # consensus price has same info as theta_t^1 + (sig_e / omega) e_t
-    cov_strong[2, 2] <- sig_e^2
+    R <- rbind(c(0, 0, 0), c(0, sig_e, 0))  # perfect private signal
+
+    # covariance of weak's beliefs for theta_t^(0:ord) is aux$cov
+    aux <- covkal_ss_nimark(A = A, C = C, D1 = D1, D2 = D2, R = R,
+                             P0 = P0, tol = tol)
+
+    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
+    cov_strong <- selec %*% aux$cov %*% t(selec)
 
 
     # -------------------------------------------------------------------------
