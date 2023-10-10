@@ -1,14 +1,15 @@
 # first created: 1 Oct 2023
-# last updated: 5 Oct 2023
+# last updated: 10 Oct 2023
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
+# and Kalman gains of weak and stong for their signals
 # for the counterfactual experiments (1 & 2) and baseline (3):
 # 1. no consensus price
 # 2. consensus price, but the given submitter does not observe it
 # 3. baseline, submitter observes private signal and consensus price
 
-cov_counterfactual <- function(paras, ord, tol=1e-15) {
+covkal_counterfactual <- function(paras, ord, tol=1e-15) {
 
     source("createStateSpaceMat2_Lagged_pubpriv_heterogenous.R")
     source("CovKal_SteadyState.R")
@@ -19,7 +20,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     sig_u <- paras[3]
     sig_e <- paras[4]
     sig_n <- paras[5]
-    
+
     # ------------------- 1. no consensus price  ------------------------------
 
     # calculate stationary Kalman gain and variance of (1st order) belief
@@ -60,6 +61,8 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
     selec <- rbind(c(1, 0), c(1 - omega, omega))
     cov_weak_noprice <- selec %*% aux$cov %*% t(selec)
+    kg_weak_noprice <- selec %*% aux$kg
+
 
     # 1b. strong submitter
     # signal: s_{i,t} = theta_t
@@ -74,6 +77,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
     selec <- rbind(c(1, 0), c(1 - omega, omega))
     cov_strong_noprice <- selec %*% aux$cov %*% t(selec) # equal zero (CHECK!)
+    kg_strong_noprice <- selec %*% aux$kg
 
 
     # ---------------- 2. submitter does not participate  ---------------------
@@ -97,6 +101,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
     selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_weak_price <- selec %*% aux$cov %*% t(selec)
+    kg_weak_price <- selec %*% aux$kg
 
     # 2b. strong submitter
 
@@ -112,6 +117,7 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
     selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_strong_price <- selec %*% aux$cov %*% t(selec)
+    kg_strong_price <- selec %*% aux$kg
 
 
     # ------------------------ 3. baseline model  -----------------------------
@@ -134,16 +140,18 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
 
     selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_weak <- selec %*% aux$cov %*% t(selec)
+    kg_weak <- selec %*% aux$kg
 
     # 3b. strong submitter (with private signal & consensus price)
     R <- rbind(c(0, 0, 0), c(0, sig_e, 0))  # perfect private signal
 
-    # covariance of weak's beliefs for theta_t^(0:ord) is aux$cov
+    # covariance of strong's beliefs for theta_t^(0:ord) is aux$cov
     aux <- covkal_ss_nimark(A = A, C = C, D1 = D1, D2 = D2, R = R,
                              P0 = P0, tol = tol)
 
     selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_strong <- selec %*% aux$cov %*% t(selec)
+    kg_strong <- selec %*% aux$kg
 
 
     # -------------------------------------------------------------------------
@@ -151,13 +159,22 @@ cov_counterfactual <- function(paras, ord, tol=1e-15) {
     res <- list()
 
     res$"cov_weak_noprice" <- cov_weak_noprice
+    res$"kg_weak_noprice" <- kg_weak_noprice
+
     res$"cov_strong_noprice" <- cov_strong_noprice
+    res$"kg_strong_noprice" <- kg_strong_noprice
 
     res$"cov_weak_price" <- cov_weak_price
+    res$"kg_weak_price" <- kg_weak_price
+
     res$"cov_strong_price" <- cov_strong_price
+    res$"kg_strong_price" <- kg_strong_price
 
     res$"cov_weak" <- cov_weak
+    res$"kg_weak" <- kg_weak
+
     res$"cov_strong" <- cov_strong
+    res$"kg_strong" <- kg_strong
 
     return(res)
 

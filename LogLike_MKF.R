@@ -21,6 +21,7 @@ LogLike_MKF <- function(y, paras, init, types, ord, crit_eff){
   LL_T <- sapply(1:n_paths, function(i) kf_draws[[i]]$LL)
   
   LL <- logSumExp(ln_wT + LL_T)  # LL is the log-likelihood where LL = log( sum_m exp(ln.wT[m]) * exp(LL.T[m]) ) = log( sum_m exp(ln.wT[m] + LL.T[m])
+  
   return(LL)
   
 }
