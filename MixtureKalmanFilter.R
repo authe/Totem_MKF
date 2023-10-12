@@ -2,7 +2,8 @@
 # last updated: 12 Oct 2023
 # author: Andreas Uthemann
 
-MKF <- function(y, types, models, ind_mod, crit_eff = 0.2, crit_single = (1 - 1e-06)) {
+MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
+        crit_single = (1 - 1e-06), resample_mult = 10, resample_min = 10000) {
 
   # Given intial draw of submitters types (types: M*S matrix with types[m,s]=1 implying submitter s in draw m is weak type) 
   # and corresponding state space models (models: ind.mod[m] gives the correct model for type draw m
@@ -85,7 +86,7 @@ MKF <- function(y, types, models, ind_mod, crit_eff = 0.2, crit_single = (1 - 1e
     if (Mt_eff / Mt < crit_eff) { # resample
       
       # makes sure we resample "enough" paths
-      aux <- sample(1:Mt, size = max(10*Mt, 10000), 
+      aux <- sample(1:Mt, size = max(resample_mult * Mt, resample_min), 
                   replace = TRUE, prob = wt_vec) 
 
       new_paths <- sort(unique(aux))
