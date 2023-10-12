@@ -104,7 +104,7 @@ MKF <- function(y, types, models, ind_mod, crit_eff = 0.2, crit_single = (1 - 1e
       types <- types[new_paths,]
       ind_mod <- ind_mod[new_paths]
       
-      } elseif (max(wt_vec) > crit_single && Mt > 1) { # keep 1 path only
+      } else if (max(wt_vec) > crit_single && Mt > 1) { # keep 1 path only
       
       ind_max <- which(wt_vec == max(wt_vec))
       Mt <- 1
