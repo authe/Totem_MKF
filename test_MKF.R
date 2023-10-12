@@ -103,8 +103,8 @@ scale_mcmc[4,4] <- 0.04  # sig_e
 scale_mcmc[5,5] <- 0.025 # sig_n
 scale_mcmc[6,6] <- 0.005 # sig_z
 
-nbatch_mcmc <- 50
-burnin_mcmc <- 10
+nbatch_mcmc <- 10
+burnin_mcmc <- 1
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
