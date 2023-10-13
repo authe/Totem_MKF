@@ -1,9 +1,9 @@
 # first created: 30 Apr 2023
-# last updated: 12 Oct 2023
+# last updated: 13 Oct 2023
 # author: Andreas Uthemann
 
 MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
-        crit_single = (1 - 1e-06), resample_mult = 10, resample_min = 10000) {
+        crit_single = (1 - 1e-06), resample_mult = 10, resample_min = 10000, seed = 1) {
 
   # Given intial draw of submitters types (types: M*S matrix with types[m,s]=1 implying submitter s in draw m is weak type) 
   # and corresponding state space models (models: ind.mod[m] gives the correct model for type draw m
@@ -17,6 +17,7 @@ MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
   # kf.val[[m]]at : posterior mean of state given y and m
   # kf.val[[m]]Pt : posterior variance of state given y and m
 
+  set.seed(seed)  # used for resampling
   library(matrixStats)  # only used for logExpSum function (can be hand-coded if package does not work, e.g. https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/)
 
   source("KalmanStep.R")
