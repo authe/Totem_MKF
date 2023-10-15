@@ -17,6 +17,9 @@ MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
   # kf.val[[m]]at : posterior mean of state given y and m
   # kf.val[[m]]Pt : posterior variance of state given y and m
 
+  old <- .Random.seed
+  on.exit( { .Random.seed <<- old } ) # needed for MCMC
+
   set.seed(seed)  # used for resampling
   library(matrixStats)  # only used for logExpSum function (can be hand-coded if package does not work, e.g. https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/)
 

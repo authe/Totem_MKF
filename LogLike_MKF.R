@@ -2,7 +2,7 @@
 # last updated: 12 Oct 2023
 # author: Andreas Uthemann
 
-LogLike_MKF <- function(y, paras, init, types, ord, crit_eff){
+LogLike_MKF <- function(y, paras, init, types, ord, crit_eff, seed = 1){
   
   # computes the log-likelihood of y for model of order "ord" and parameters "paras" and "init" using matrix types in the Mixture Kalman Filter 
   # crit_eff sets critical value for resampling (as percentage of total sample - see MixtureKalmanFilter.R)
@@ -14,7 +14,7 @@ LogLike_MKF <- function(y, paras, init, types, ord, crit_eff){
   source("MixtureKalmanFilter.R")
   
   mod <- MakeModels(y, types, paras, init, ord)
-  kf_draws <- MKF(y, types, mod$models, mod$ind_mod, crit_eff = crit_eff)
+  kf_draws <- MKF(y, types, mod$models, mod$ind_mod, crit_eff = crit_eff, seed = seed)
   
   n_paths <- length(kf_draws)
   

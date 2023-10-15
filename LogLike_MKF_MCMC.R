@@ -2,7 +2,7 @@
 # last updated: 12 Oct 2023
 # author: Andreas Uthemann
 
-ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h){
+ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, seed = 1){
   # transform parameters to unconstrained problem
   # see mcmc R package pdf for logic of ifelse (avoids numerical problems)
   source("LogLike_MKF.R")
@@ -24,7 +24,7 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h){
                      (l + h * exp(par[6])) / (1 + exp(par[6])))
   
   res <- LogLike_MKF(y = y, paras = paras, init = init, types = types, 
-                        ord = ord, crit_eff = crit_eff)
+                        ord = ord, crit_eff = crit_eff, seed = seed)
   ll_out <- res$LL
   
   # calculate Jacobian for transformed parameters
