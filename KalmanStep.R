@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 6 Sep 2023
+# last updated: 18 Oct 2023
 # author: Andreas Uthemann
 
 # function calculates Kalman updating step for a given prior for state vector (at, Pt) and log sample weight for a given sample path (ln.wt) given new observation (yt)
@@ -12,7 +12,7 @@ KalmanStep <- function(yt, ln_wt, at, Pt, LL, dt, Tt, HHt, ct, Zt, GGt){
   # ln.wt is the weight of the given sample path using data (y_1,...,y_{t-1})
   
   # Adjusting for missing observation in yt:
-  # modify observation equation yt = ct + Zt alpha_t + Ht eta_t with eta_t ~ N(0,I_m) for missing observations in yt
+  # modify observation equation yt = ct + Zt alpha_t + Gt eta_t with eta_t ~ N(0,I_m) for missing observations in yt
   # WWt is a selection matrix of dim(yt). Starting from an identity matrix, if yt(j) is missing, row j of WWt is deleted. 
   # New observation equation is yt* = Zt* alpha_t + Gt* eta_t with yt* = WWt yt, Zt* = WWt Zt and Gt* = WWt Gt (implying GGt* = WWt GGt WWt')
   
