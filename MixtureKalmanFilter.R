@@ -1,9 +1,9 @@
 # first created: 30 Apr 2023
-# last updated: 13 Oct 2023
+# last updated: 3 Nov 2023
 # author: Andreas Uthemann
 
 MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
-        crit_single = (1 - 1e-06), resample_mult = 10, resample_min = 10000, seed = 1) {
+        crit_single = 1, resample_mult = 10, resample_min = 10000, seed = 1) {
 
   # Given intial draw of submitters types (types: M*S matrix with types[m,s]=1 implying submitter s in draw m is weak type) 
   # and corresponding state space models (models: ind.mod[m] gives the correct model for type draw m
