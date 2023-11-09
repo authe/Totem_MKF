@@ -1,8 +1,8 @@
 # first created: 20 Aug 2023
-# last updated: 12 Oct 2023
+# last updated: 9 Nov 2023
 # author: Andreas Uthemann
 
-ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, seed = 1){
+ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed = 1){
   # transform parameters to unconstrained problem
   # see mcmc R package pdf for logic of ifelse (avoids numerical problems)
   source("LogLike_MKF.R")
@@ -49,6 +49,23 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, seed = 1){
                        log(h - l) + par[6] - 2 * log1p(exp(par[6])))
   
   ll <- ll_out + sum(log_jac) - 4 * log(h - l)
+
+
+  # append "surviving" types and their weights wT to list types_mcmc 
+  # and save to file path_types
+  if (!file.exists(path_types)) {
+    stop(paste0("File ", path_types, " does not exist."))
+  } else {
+    load(file = path_types)
+    n <- length(types_mcmc) + 1
+    print(n)
+
+    aux <- list(wT = res$wT, types = res$typesT)
+    types_mcmc[[n]] <- aux
+
+    save(types_mcmc, file = path_types)
+  }
   
+  # return log-likelihood
   return(ll)
 }

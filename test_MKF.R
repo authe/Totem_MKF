@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 28 Sep 2023
+# last updated: 9 Nov 2023
 # author: Andreas Uthemann
 
 rm(list=ls())
@@ -12,10 +12,18 @@ source('LogLike_MKF.R')
 source("InitialParasGuess.R")
 source("DrawTypes.R")
 
-# -------------------------- Simulate data for testing ------------------------
-
 seed_sim <- 1
 set.seed(seed_sim)
+
+# ----------------------------- output paths ----------------------------------
+
+outfile <- paste0("results_mcmc_simdata_paraset1_scale6_seed", seed_sim, ".RData")
+path_out <- "results/"
+
+# output file for posterior weights wT of MCMC
+path_types <- paste0(path_out, "types_mcmc_simdata_paraset1_scale6_seed", seed_sim, ".RData")
+
+# -------------------------- Simulate data for testing ------------------------
 
 S <- 40  # number of submitters
 TT <- 200  # submission dates
@@ -58,7 +66,7 @@ init <- InitialParas(y_sim)
 
 # calculate log-likelihood at true parameters (mostly test)
 
-M_mkf <- 50000 # types draws for MKF
+M_mkf <- 500 # types draws for MKF
 p_class <- 0.9
 crit_eff = 0.2
 types_mkf <- DrawTypes(M_mkf, init, p_class)
@@ -76,11 +84,15 @@ toc()
 # (fct ll_mcmc accepts unrestricted parameters; original parameters are scaled)
 source("LogLike_MKF_MCMC.R")
 
+# list to keep track of index of surviving types and corresponding weights
+types_mcmc <- list()
+save(types_mcmc, file = path_types)
+
 # parameters for Mixed Kalman Filter
 ord <- 2
 p_class <- 0.9
 crit_eff = 0.2
-M <- 50000  # number of draws from types space ( 2^S possible type combinations)
+M <- 500  # number of draws from types space ( 2^S possible type combinations)
 
 # parameters for parameter rescaling 
 l <- 0  # lower bound for standard deviation parameters (sig.u, sig.e, sig.n, sig.z)
@@ -103,7 +115,7 @@ scale_mcmc[4,4] <- 0.04  # sig_e
 scale_mcmc[5,5] <- 0.025 # sig_n
 scale_mcmc[6,6] <- 0.005 # sig_z
 
-nbatch_mcmc <- 10
+nbatch_mcmc <- 5
 burnin_mcmc <- 1
 
 # ----------------- MCMC estimation and processing of results  ----------------
@@ -111,7 +123,8 @@ burnin_mcmc <- 1
 tic()
 out_mcmc <- metrop(ll_mcmc, initial = par_0, nbatch = nbatch_mcmc, 
                    scale = scale_mcmc, y = y_sim, init = init, types = types, 
-                   ord = ord, crit_eff = crit_eff, l = l, h = h)
+                   ord = ord, crit_eff = crit_eff, l = l, h = h, 
+                   path_types = path_types)
 toc()
 
 # acceptance rate of chain (ideally between 20% to 30%)
@@ -147,6 +160,4 @@ results_mcmc <- list(out_mcmc, paras_sim, paras_est, paras_est_se,
 names(results_mcmc) <- c("out_mcmc", "paras_sim", "paras_est", "paras_est_se",
                          "seed", "scale_mcmc")
 
-outfile <- paste0("results_mcmc_simdata_NAs_paraset1_scale6_seed", seed_sim, ".RData")
-path_out <- "results/"
 save(results_mcmc, file = paste0(path_out, outfile))

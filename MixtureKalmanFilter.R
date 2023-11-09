@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 3 Nov 2023
+# last updated: 9 Nov 2023
 # author: Andreas Uthemann
 
 MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
@@ -51,6 +51,7 @@ MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
         kf_val[[m]]$at <- models[[ind_mod[m]]]$a0
         kf_val[[m]]$Pt <- models[[ind_mod[m]]]$P0
         kf_val[[m]]$types <- types[m, ]
+        kf_val[[m]]$types_ind <- m  # keep track of original index
       }
 
       # rearrange submitters to fit state-space model:

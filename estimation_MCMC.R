@@ -1,5 +1,5 @@
 # first created: 20 Aug 2023
-# last updated: 28 Sep 2023
+# last updated: 9 Nov 2023
 # author: Andreas Uthemann
 
 # main program for MCMC estimation of MKF
@@ -11,16 +11,27 @@ library(tictoc)
 seed <- 1
 set.seed(seed)
 
-# -------------------- load data for estimation -------------------------------
+# ------- contract specification and input & output file paths ----------------
 
 ind <- "SPX"
 term <- "12"
 strike <- "150"
 opttyp <- "CE"
 
+# path to input data and output/results
 path_data <- "data/"
 data_file <- paste0("estdata_", ind, "Term", term, "Strike", strike, 
                     opttyp, ".RData")
+
+path_out <- "results/"
+outfile <- paste0("results_mcmc_", ind, "Term", term, "Strike", strike, opttyp,
+                    "_Seed", seed, ".RData")
+# output file for posterior weights wT of MCMC
+path_types <- paste0(path_out, "types_mcmc_", ind, "Term", term, "Strike",
+                    strike, opttyp, "_Seed", seed, ".RData")
+
+
+# -------------------- load data for estimation -------------------------------                    
 
 load(file = paste0(path_data, data_file))
 
@@ -49,6 +60,10 @@ types <- DrawTypes(M, init, p_class)
 
 # -------------------- set parameters for MCMC estimation ---------------------
 
+# list to keep track of index of surviving types and corresponding weights
+types_mcmc <- list()
+save(types_mcmc, file = path_types)
+
 # bounds for parameter rescaling 
 l <- 0  # lower bound for stddev parameters (sig.u, sig.e, sig.n, sig.z)
 h <- 1  # upper bound
@@ -76,7 +91,8 @@ burnin_mcmc <- 10
 tic()
 out_mcmc <- metrop(ll_mcmc, initial = par_0, nbatch = nbatch_mcmc, 
                    scale = scale_mcmc, y = y_est, types = types, 
-                   init = init, ord = ord, crit_eff = crit_eff, l = l, h = h)
+                   init = init, ord = ord, crit_eff = crit_eff, l = l, h = h,
+                   path_types = path_types)
 toc()
 
 # ---------------------------- process results  -------------------------------
@@ -116,9 +132,5 @@ names(results_mcmc) <- c("out_mcmc", "paras_est", "para_est_se",
                         "seed", "init", "scale_mcmc", "LL_spec")
 
 # --------------------------- save results ------------------------------------
-
-outfile <- paste0("results_mcmc_", ind, "Term", term, "Strike", strike, opttyp,
-                    "_Seed", seed, ".RData")
-path_out <- "results/"
 
 save(results_mcmc, file = paste0(path_out, outfile))

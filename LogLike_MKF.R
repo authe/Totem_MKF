@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 12 Oct 2023
+# last updated: 9 Nov 2023
 # author: Andreas Uthemann
 
 LogLike_MKF <- function(y, paras, init, types, ord, crit_eff, seed = 1){
@@ -19,12 +19,9 @@ LogLike_MKF <- function(y, paras, init, types, ord, crit_eff, seed = 1){
   n_paths <- length(kf_draws)
   
   ln_wT <- sapply(1:n_paths, function(i) kf_draws[[i]]$ln_wt)
+  types_T <- sapply(1:n_paths, function(i) kf_draws[[i]]$types_ind)
   LL_T <- sapply(1:n_paths, function(i) kf_draws[[i]]$LL)
 
-  types_T <- c()
-  for (i in 1:n_paths) {
-    types_T <- rbind(types_T, kf_draws[[i]]$types)
-  }
   
   LL <- logSumExp(ln_wT + LL_T)  # LL is the log-likelihood where LL = log( sum_m exp(ln.wT[m]) * exp(LL.T[m]) ) = log( sum_m exp(ln.wT[m] + LL.T[m])
 
