@@ -1,5 +1,5 @@
 # first created: 1 Oct 2023
-# last updated: 10 Oct 2023
+# last updated: 3 Dec 2023
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
@@ -153,6 +153,19 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
     cov_strong <- selec %*% aux$cov %*% t(selec)
     kg_strong <- selec %*% aux$kg
 
+
+    # -------------------------------------------------------------------------
+
+    # set covariance entries with absolute val below tol level to 0
+    
+    cov_weak_noprice[abs(cov_weak_noprice) < tol] <- 0
+    cov_strong_noprice[abs(cov_strong_noprice) < tol] <- 0
+
+    cov_weak_price[abs(cov_weak_price) < tol] <- 0
+    cov_strong_price[abs(cov_strong_price) < tol] <- 0
+
+    cov_weak[abs(cov_weak) < tol] <- 0
+    cov_strong[abs(cov_strong) < tol] <- 0
 
     # -------------------------------------------------------------------------
 
