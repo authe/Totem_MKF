@@ -1,5 +1,5 @@
 # first created: 1 Oct 2023
-# last updated: 3 Dec 2023
+# last updated: 31 Dec 2023
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
@@ -8,6 +8,7 @@
 # 1. no consensus price
 # 2. consensus price, but the given submitter does not observe it
 # 3. baseline, submitter observes private signal and consensus price
+# 4. perfect consensus price
 
 covkal_counterfactual <- function(paras, ord, tol=1e-15) {
 
@@ -154,6 +155,34 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
     kg_strong <- selec %*% aux$kg
 
 
+    # ------------------------ 4. perfect consensus price ---------------------
+
+    # perfect consenus price: p_t = theta_t
+
+    # Kalman gain k11 for weak
+    k11_weak <- sig_u^2 / (sig_u^2 + sig_n^2)
+
+    # beta is cofficient on u_t in average 1st order expectation:
+    # thetabar_t = rho theta_{t-1} + [(1-omega) + omega k11] u_t
+    beta <- (1-omega) + k11_weak * omega
+
+    # covariance matrix of X  (see paper appendix for definition)
+    Cov_X <- rbind(c(sig_u^2, beta * sig_u^2), 
+                c(beta * sig_u^2, beta^2 * sig_u^2)) 
+    # covariance of X and signal y_{i,t} = s_{i,t} - rho theta_{t-1}
+    Cov_XY <- c(sig_u^2, beta * sig_u^2)
+    sig2_y <- sig_u^2 + sig_n^2
+
+    # covariance for 1st and 2nd order beliefs of weak
+    cov_weak_perfect <- Cov_X - (Cov_XY %*% t(Cov_XY)) / sig2_y
+    kg_weak_perfect <- rbind(c(k11_weak, (1 - k11_weak) * rho), 
+                    c(beta * k11_weak, (beta + omega) * (1 - k11_weak) * rho))
+
+    # strong know fundamental and average 1st order expectation
+    cov_strong_perfect <- matrix(rep(0,4), nrow = 2)
+    kg_strong_perfect <- rbind(c(1, 0), c(beta, omega * (1 - k11_weak) * rho))
+    
+
     # -------------------------------------------------------------------------
 
     # set covariance entries with absolute val below tol level to 0
@@ -188,6 +217,12 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
 
     res$"cov_strong" <- cov_strong
     res$"kg_strong" <- kg_strong
+
+    res$"cov_weak_perfect" <- cov_weak_perfect
+    res$"kg_weak_perfect" <- kg_weak_perfect
+
+    res$"cov_strong_perfect" <- cov_strong_perfect
+    res$"kg_strong_perfect" <- kg_strong_perfect
 
     return(res)
 
