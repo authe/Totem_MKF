@@ -1,5 +1,5 @@
 # first created: 20 Aug 2023
-# last updated: 9 Nov 2023
+# last updated: 25 Jan 2023
 # author: Andreas Uthemann
 
 ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed = 1){
@@ -56,7 +56,7 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed =
   if (!file.exists(path_types)) {
     stop(paste0("File ", path_types, " does not exist."))
   } else {
-    load(file = path_types)
+    load(path_types)
     n <- length(types_mcmc) + 1
     print(n)
 
