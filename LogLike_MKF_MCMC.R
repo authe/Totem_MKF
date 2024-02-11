@@ -1,5 +1,5 @@
 # first created: 20 Aug 2023
-# last updated: 25 Jan 2023
+# last updated: 11 Feb 2023
 # author: Andreas Uthemann
 
 ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed = 1){
