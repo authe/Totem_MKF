@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 23 Jan 2024
+# last updated: 11 Feb 2024
 # author: Andreas Uthemann
 
 MKF <- function(y, types, models, ind_mod, crit_eff = 0.2,
