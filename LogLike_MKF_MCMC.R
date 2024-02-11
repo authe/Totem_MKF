@@ -60,7 +60,8 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed =
     n <- length(types_mcmc) + 1
     print(n)
 
-    aux <- list(wT = res$wT, types = res$typesT)
+    aux <- list(wT = res$wT, types = res$typesT, LL = ll)
+
     types_mcmc[[n]] <- aux
 
     save(types_mcmc, file = path_types)
