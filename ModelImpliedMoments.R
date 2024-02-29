@@ -6,7 +6,7 @@ ModelMoments <- function(ord, rho, omega, sig_u, sig_e, sig_n, sig_z, tol=1e-15)
   # - time-series standard deviation of consensus price: stdDev_price
   #
   # first created: 28 Feb 2024
-  # last updated: 28 Feb 2024
+  # last updated: 29 Feb 2024
   # author: Andreas Uthemann
   
   source("createStateSpaceMat2_Lagged_pubpriv_heterogenous.R")
@@ -14,7 +14,7 @@ ModelMoments <- function(ord, rho, omega, sig_u, sig_e, sig_n, sig_z, tol=1e-15)
   library(expm)
   
   # get matrices for state space system
-  KalMat <- StateSpaceMatLag(ord=ord, rho=rho, omega=omega, sig_u=sig_u, sig_e=sig_e, sig_n+sig_n, tol=tol)
+  KalMat <- StateSpaceMatLag(ord=ord, rho=rho, omega=omega, sig_u=sig_u, sig_e=sig_e, sig_n=sig_n, tol=tol)
 
   # transition equation for weak submitters: theta_t = M_k theta_{t-1} + N_k w_t with w_t ~ N(0, I_2)
   # observation equation: y_t = D_{k,1} theta_t + D_{k,2} theta_{t-1} + R_w w_t + R_n eta_{j,t} with eta_{j,t} = N(0,1)
