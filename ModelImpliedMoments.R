@@ -51,7 +51,7 @@ ModelMoments <- function(ord, rho, omega, sig_u, sig_e, sig_n, sig_z, tol=1e-15)
   SigmaCross_weak <- Sum_New
 
   # unconditional cross-section variance of 1st order beliefs:
-  # weighted sum of weak and strong variance (taking unconditional means for weak and strong to be 0)
+  # weighted sum of weak and strong variance (setting unconditional means for weak and strong to 0)
 
   sig_cross <- omega * SigmaCross_weak[1,1] + (1-omega) * sig_z^2
   stdDev_cross <- sqrt(sig_cross)
