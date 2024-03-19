@@ -3,7 +3,7 @@ SP_model_demeaned <- function(rho, omega, sig_u, sig_e, sig_n, ord, S, W, sig_z=
   #########################  CREATE STATE SPACE MODEL FOR FKF PACKAGE ########################################
   
   # first created: 18 Jul 2022
-  # last updated: 19 AUG 2023
+  # last updated: 18 Mar 2024
   # author: Andreas Uthemann
   
   # (i) bring model into state space form for FKF package Kalman filter
@@ -12,7 +12,7 @@ SP_model_demeaned <- function(rho, omega, sig_u, sig_e, sig_n, ord, S, W, sig_z=
   # Let i=1,...,W be the "weak" submitters with W <= S (number of submitters)
   # Then alpha_t = (theta_t^(0), ..., theta_t^(ord), x_{1,t}^(1),...,x_{1,t}^(ord), ..., x_{W,t}^(ord), e_t, (1-omega) theta_{t-1}^(0) + omega theta_{t-1}^(1))
   # where x_{i,t}^(l) = theta_{i,t}^(l) - theta_t^(l) and 1 <= l <= ord 
-  # y_t = (p_t, theta_t^(1) + x_{1,t}^(1) + sig.z z_{1,t},...,theta_t^(1) + x_{W,t}^(1) + sig.z z_{W,t}, theta_t^(0) + sig.z z_{S-W+1,t},...,theta_t^(0) + sig.z z_{S,t} }
+  # y_t = (p_t, theta_t^(1) + x_{1,t}^(1),...,theta_t^(1) + x_{W,t}^(1), theta_t^(0) + sig.z z_{S-W+1,t},...,theta_t^(0) + sig.z z_{S,t} }
   # where p_t = (1-omega) theta_{t-1}^(0) + omega theta_{t-1}^(1) + sig.e e_t
   
   source("createStateSpaceMat2_Lagged_pubpriv_heterogenous.R")
@@ -54,7 +54,7 @@ SP_model_demeaned <- function(rho, omega, sig_u, sig_e, sig_n, ord, S, W, sig_z=
   Zt <- matrix(0, nrow = (1 + S), ncol = (ord + 1 + (W * ord) + 2))
   Zt[1, ord + 1 + (ord * W) + 1] <- sig_e  # consensus price is (1-omega) theta_{t-1}^(0) + omega theta_{t-1}^(1) + sig.e e_t
   Zt[1, ord + 1 + (ord * W) + 2] <- 1
-  Zt[2:(W + 1), 2] <- 1  # "weak" submitters i=1,...,W submit theta_t^(1) + x_{i,t}^(1) + sig.z z_{i,t}
+  Zt[2:(W + 1), 2] <- 1  # "weak" submitters i=1,...,W submit theta_t^(1) + x_{i,t}^(1)
   for (s in 1:W){
     Zt[(1 + s), (ord + 1 + (s - 1) * ord + 1)] <- 1
   }
@@ -64,11 +64,10 @@ SP_model_demeaned <- function(rho, omega, sig_u, sig_e, sig_n, ord, S, W, sig_z=
   }
   
   # shock variance matrix GGt = E(Gt e e' Gt') = Gt Gt'
-  Gt = diag(sig_z, S)
+  Gt = diag(c(rep(0, W), rep(sig_z, S-W)), S)
   Gt = rbind(rep(0, S), Gt)
   
   GGt <- Gt %*% t(Gt)
-  #GGt <- diag(0,N+1)
 
   return(list(dt = dt, Tt = Tt, HHt = HHt, ct = ct, Zt = Zt, GGt = GGt, PP = PP, SIG = SIG))
 }
