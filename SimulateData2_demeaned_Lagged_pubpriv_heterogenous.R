@@ -3,7 +3,7 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
   # code to simulate submissions for S submitters and belief order ord
   
   # first created: 20 Jul 2022
-  # last modified: 20 Aug 2023
+  # last modified: 18 Mar 2024
   # author: Andreas Uthemann
   
   # import function to create state space system
@@ -75,9 +75,9 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
   # create submission data
   submissions <- c()
   
-  # each "weak" submitter j=1,...,W submits his best estimate theta_(j,t)^(1) plus measurement error for t=1,...,TT 
+  # each "weak" submitter j=1,...,W submits his best estimate theta_(j,t)^(1) 
   for (s in 1:W){
-    submissions <- cbind(submissions, beliefs[[s]][, 1] + sig_z * rnorm(TT))
+    submissions <- cbind(submissions, beliefs[[s]][, 1])
   }
   
   # each "strong" submitter j=1,...,W submits the fundamental theta_(j,t)^(0) plus measurement error
