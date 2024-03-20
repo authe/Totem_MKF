@@ -3,7 +3,7 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
   # code to simulate submissions for S submitters and belief order ord
   
   # first created: 20 Jul 2022
-  # last modified: 18 Mar 2024
+  # last modified: 20 Mar 2024
   # author: Andreas Uthemann
   
   # import function to create state space system
@@ -31,14 +31,14 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
   ######## simulate time series for mean beliefs
   
   # draw time series of aggregate shocks w
-  w <- mvrnorm(TT+1, rep(0,2), diag(2))
+  w <- mvrnorm(TT + 1, rep(0, 2), diag(2))
   # draw initial condition using prior N(0,PP)
   theta0 <- mvrnorm(1, rep(0, ord + 1), SSMat$PP)
   theta <- theta0
   
   aux <- theta0
   for (t in 2:(TT + 1)){
-    aux <- SSMat$M %*% aux + SSMat$N %*% w[t,]
+    aux <- SSMat$M %*% aux + SSMat$N %*% w[t, ]
     theta <- rbind(theta, t(aux))
   }
   
@@ -46,8 +46,8 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
   ###### simulate time series for individual submissions
   
   # generate consensus price p_t = (1-omega) theta^(0)_{t-1} + omega theta^(1)_{t-1} + sig.e e_t
-  price = (1 - omega) * theta[(1:TT), 1] + omega * theta[(1:TT), 2] + sig_e * w[2:(TT + 1), 2]
-  price = c(0, price)
+  price <- (1 - omega) * theta[(1:TT), 1] + omega * theta[(1:TT), 2] + sig_e * w[2:(TT + 1), 2]
+  price <- c(0, price)
   
   # generate beliefs for W "weak" submitters
   
@@ -63,13 +63,13 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
     for (t in 2:(TT + 1)){
       
       priv_signal <- theta[t, 1] + sig_n * rnorm(1)
-      signals = matrix( c(priv_signal, price[t]), nrow = 2)
+      signals <- matrix( c(priv_signal, price[t]), nrow = 2)
       
       aux <- SSMat$M_ind %*% aux + SSMat$KK %*% ( signals - SSMat$D1 %*% SSMat$M_ind %*% aux - SSMat$D2 %*% aux) 
       y <- rbind(y, t(aux))
     }
     
-    beliefs[[s]] <- y[2:(TT+1),]
+    beliefs[[s]] <- y[2:(TT + 1), ]
   }
   
   # create submission data
@@ -81,8 +81,10 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=
   }
   
   # each "strong" submitter j=1,...,W submits the fundamental theta_(j,t)^(0) plus measurement error
-  for (s in (W + 1):S){
-    submissions <- cbind(submissions, theta[2:(TT + 1), 1] + sig_z * rnorm(TT))
+  if (W < S) {
+    for (s in (W + 1):S){
+      submissions <- cbind(submissions, theta[2:(TT + 1), 1] + sig_z * rnorm(TT))
+    }
   }
   
   # first row of sim.data is period's consensus price, row i > 1 corresponds to submitter i's submissions for t=1,...,TT
