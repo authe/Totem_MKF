@@ -1,4 +1,4 @@
-SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=0, ord, seed=1, tol=1e-15){
+SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n, sig_z=0, ord, seed=1, tol=1e-15) {
   
   # code to simulate submissions for S submitters and belief order ord
   
