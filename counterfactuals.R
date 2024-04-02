@@ -1,5 +1,5 @@
 # first created: 1 Oct 2023
-# last updated: 29 Mar 2024
+# last updated: 1 Apr 2024
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
@@ -122,24 +122,28 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
 
 
     # ------------------------ 3. baseline model  -----------------------------
+    
+    # get M and N (see above) for SS model with consensus price
+    ss <- StateSpaceMatLag(ord = ord, rho = rho, omega = omega, sig_u = sig_u,
+                           sig_e = sig_e, sig_n = sig_n, tol = tol)
 
     # 3a. weak submitter (with private signal & consensus price)
     A <- ss$M
     C <- ss$N
-    C <- cbind(C, rep(0, ord))
+    C <- cbind(C, rep(0, ord + 1))
 
-    D1 <- rbind(c(1, rep(0, ord-1)), rep(0, ord))
-    D2 <- rbind(rep(0, ord), c(1 - omega, omega, rep(0, ord - 2)))
+    D1 <- rbind(c(1, rep(0, ord)), rep(0, ord + 1))
+    D2 <- rbind(rep(0, ord + 1), c(1 - omega, omega, rep(0, ord - 1)))
 
     R <- rbind(c(0, 0, sig_n), c(0, sig_e, 0))  # noisy private signal
 
-    P0 <- sig2 * diag(ord)
+    P0 <- sig2 * diag(ord + 1)
 
     # covariance of weak's beliefs for theta_t^(0:ord) is aux$cov
     aux <- covkal_ss_nimark(A = A, C = C, D1 = D1, D2 = D2, R = R,
                              P0 = P0, tol = tol)
 
-    selec <- rbind(c(1, rep(0, ord-1)), c(1 - omega, omega, rep(0, ord - 2)))
+    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_weak <- selec %*% aux$cov %*% t(selec)
     kg_weak <- aux$kg
 
@@ -150,9 +154,9 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
     aux <- covkal_ss_nimark(A = A, C = C, D1 = D1, D2 = D2, R = R,
                              P0 = P0, tol = tol)
 
-    selec <- rbind(c(1, rep(0, ord-1)), c(1 - omega, omega, rep(0, ord - 2)))
+    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_strong <- selec %*% aux$cov %*% t(selec)
-    kg_strong <- aux$kg
+    kg_strong <- selec %*% aux$kg
 
 
     # ------------------------ 4. perfect consensus price ---------------------
