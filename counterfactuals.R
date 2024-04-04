@@ -1,5 +1,5 @@
 # first created: 1 Oct 2023
-# last updated: 1 Apr 2024
+# last updated: 4 Apr 2024
 # author: Andreas Uthemann
 
 # function to calculate covariance of beliefs for weak and strong submitters
@@ -62,7 +62,7 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
     selec <- rbind(c(1, 0), c(1 - omega, omega))
     cov_weak_noprice <- selec %*% aux$cov %*% t(selec)
-    kg_weak_noprice <- aux$kg
+    kg_weak_noprice <- selec %*% aux$kg
 
 
     # 1b. strong submitter
@@ -78,47 +78,47 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
     selec <- rbind(c(1, 0), c(1 - omega, omega))
     cov_strong_noprice <- selec %*% aux$cov %*% t(selec) # equal zero (CHECK!)
-    kg_strong_noprice <- aux$kg
+    kg_strong_noprice <- selec %*% aux$kg
 
 
     # ---------------- 2. submitter does not participate  ---------------------
 
     # get M and N (see above) for SS model with consensus price
-    ss <- StateSpaceMatLag(ord = (ord-1), rho = rho, omega = omega, sig_u = sig_u,
+    ss <- StateSpaceMatLag(ord = ord, rho = rho, omega = omega, sig_u = sig_u,
                            sig_e = sig_e, sig_n = sig_n, tol = tol)
     M <- ss$M
     N <- ss$N
 
     # 2a. weak submitter
     # signal: s_{i,t} = theta_t + sig_n eta_{i,t}
-    Z <- cbind(1, t(rep(0, ord-1)))
+    Z <- cbind(1, t(rep(0, ord)))
     H <- sig_n^2
-    P0 <- sig2 * diag(ord)
+    P0 <- sig2 * diag(ord + 1)
 
     # covariance of weak's beliefs for theta_t^(0:ord) is aux$cov
     aux <- covkal_ss(M = M, N = N, Z = Z, H = H, P0 = P0, tol = tol)
 
     # average expectation: thetabar_t = (1-omega) theta_t + omega theta_t^1
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
-    selec <- rbind(c(1, rep(0, ord-1)), c(1 - omega, omega, rep(0, ord - 2)))
+    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_weak_price <- selec %*% aux$cov %*% t(selec)
-    kg_weak_price <- aux$kg
+    kg_weak_price <- selec %*% aux$kg
 
     # 2b. strong submitter
 
     # signal: s_{i,t} = theta_t
-    Z <- cbind(1, t(rep(0, ord-1)))
+    Z <- cbind(1, t(rep(0, ord)))
     H <- 0  # perfect signal
-    P0 <- sig2 * diag(ord)
+    P0 <- sig2 * diag(ord + 1)
 
     # covariance of strong's beliefs for theta_t^(0:ord) is aux$cov
     aux <- covkal_ss(M = M, N = N, Z = Z, H = H, P0 = P0, tol = tol)
 
     # average expectation: thetabar_t = (1-omega) theta_t + omega theta_t^1
     # covariance matrix for weak's beliefs for (theta_t, thetabar_t)^T :
-    selec <- rbind(c(1, rep(0, ord-1)), c(1 - omega, omega, rep(0, ord - 2)))
+    selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_strong_price <- selec %*% aux$cov %*% t(selec)
-    kg_strong_price <- aux$kg
+    kg_strong_price <- selec %*% aux$kg
 
 
     # ------------------------ 3. baseline model  -----------------------------
@@ -145,7 +145,7 @@ covkal_counterfactual <- function(paras, ord, tol=1e-15) {
 
     selec <- rbind(c(1, rep(0, ord)), c(1 - omega, omega, rep(0, ord - 1)))
     cov_weak <- selec %*% aux$cov %*% t(selec)
-    kg_weak <- aux$kg
+    kg_weak <- selec %*% aux$kg
 
     # 3b. strong submitter (with private signal & consensus price)
     R <- rbind(c(0, 0, 0), c(0, sig_e, 0))  # perfect private signal
