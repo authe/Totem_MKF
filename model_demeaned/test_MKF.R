@@ -1,5 +1,5 @@
-# first created: 30 Apr 2023
-# last updated: 9 Nov 2023
+# first created: 11 Apr 2024
+# last updated: 11 Apr 2024
 # author: Andreas Uthemann
 
 rm(list=ls())
@@ -7,7 +7,7 @@ rm(list=ls())
 library(mcmc)
 library(tictoc)
 
-source('SimulateData2_demeaned_Lagged_pubpriv_heterogenous.R')
+source('SimulateData_demeaned.R')
 source('LogLike_MKF.R')
 source("InitialParasGuess.R")
 source("DrawTypes.R")
