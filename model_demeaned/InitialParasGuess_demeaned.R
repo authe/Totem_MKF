@@ -1,5 +1,5 @@
 # first created: 17 Apr 2024
-# last updated: 17 Apr 2024
+# last updated: 18 Apr 2024
 # author: Andreas Uthemann
 
 InitialParas <- function(y, seed=1){
