@@ -1,5 +1,5 @@
 # first created: 17 Apr 2024
-# last updated: 18 Apr 2024
+# last updated: 20 Apr 2024
 # author: Andreas Uthemann
 
 InitialParas <- function(y, seed=1){
@@ -99,7 +99,7 @@ InitialParas <- function(y, seed=1){
   
   # find psi from equation for k11
   eq_psi <- function(psi){
-    val <- (xi_hat*psi + rho_hat^2 * k_hat)/(xi_hat*psi + rho_hat^2 + psi/(1 + psi)) - k11
+    val <- (xi_hat*psi + rho_hat^2 * k_hat)/(xi_hat*psi + rho_hat^2 + psi/(1 - psi)) - k11
     return(val)
   }
   
