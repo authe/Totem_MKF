@@ -1,5 +1,5 @@
 # first created: 30 Apr 2023
-# last updated: 9 Nov 2023
+# last updated: 24 Nov 2024
 # author: Andreas Uthemann
 
 LogLike_MKF <- function(y, paras, init, types, ord, crit_eff, seed = 1){
@@ -10,7 +10,7 @@ LogLike_MKF <- function(y, paras, init, types, ord, crit_eff, seed = 1){
 
   library(matrixStats)  # only used for logExpSum function (can be hand-coded if package does not work, e.g. https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/)
   
-  source("MakeModels.R")
+  source("MakeModels_demeaned.R")
   source("MixtureKalmanFilter.R")
   
   mod <- MakeModels(y, types, paras, init, ord)

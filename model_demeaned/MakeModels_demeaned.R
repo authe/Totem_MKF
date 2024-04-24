@@ -1,5 +1,5 @@
-# first created: 28 Sep 2023
-# last updated: 28 Sep 2023
+# first created: 24 Apr 2024
+# last updated: 24 Apr 2024
 # author: Andreas Uthemann
 
 
@@ -11,7 +11,7 @@ MakeModels <- function(y, types, paras, init, ord){
   # models[[ind.mod[m]]] : state space model for draw m (vector ind_mod of length M maps draw m to corresponding state space model) 
   # (Return dimension M can be smaller than initial M if type draws are duplicated)
 
-  source("FKFModel2_demeaned_Lagged_pubpriv_heterogenous.R")   # function that creates matrices for state space model
+  source("StateSpaceModel_demeaned.R")   # function that creates matrices for state space model
   
   # parameters for state space model
   ord <- ord  # highest order of beliefs
@@ -29,7 +29,7 @@ MakeModels <- function(y, types, paras, init, ord){
   # data-based parameter values used to set "reasonable" data-driven priors (a0,P0) for the initial state 
   # Important: paras.0 only depend on data y and do not change with type m or "estimation" parameters paras
   # init <- InitialParas(y)
-  paras_0 <- init$par  
+  paras_0 <- init$par
   rho_0 <- paras_0[1]
   omega_0 <- paras_0[2]
   sig_u_0 <- paras_0[3]
@@ -53,8 +53,8 @@ MakeModels <- function(y, types, paras, init, ord){
     ss <- SP_model_demeaned(rho = rho, omega = omega, sig_u = sig_u, sig_e = sig_e, 
                             sig_n = sig_n, sig_z = sig_z, ord = ord, tol = 1e-15, S = S, W = w)
     
-    # initialize prior mean and covariance of state vector alpha_t = (theta_t^(0),..., theta_t^(ord),x_{1,t}^(1),...,x_{W,t}^(ord),e_t, (1-omega) theta_{t-1}^(0)+ omega theta_{t-1}^(1))
-    a0 <- c(rep(0, ord+1), rep(0,w * ord), 0, 0)
+    # initialize prior mean and covariance of state vector alpha_t = (theta_t^(0),..., theta_t^(ord),x_{1,t}^(1),...,x_{W,t}^(ord),e_t)
+    a0 <- c(rep(0, ord+1), rep(0,w * ord), 0)
     
     P0 <- diag(w) %x% matrix(sig_n_0^2, nrow = ord, ncol = ord)
     P0 <- rbind(matrix(0, nrow = (1 + ord), ncol = (w * ord)), P0)
@@ -64,9 +64,6 @@ MakeModels <- function(y, types, paras, init, ord){
     P0 <- cbind(aux, P0)  # covariance matrix for theta^(0:ord) and W submitters' deviations
     P0 <- cbind(P0, rep(0, ord + 1 + (w * ord)))
     P0 <- rbind(P0, c(rep(0, ord + 1 + (w * ord)), sig_e_0)) # add covariance of price error e_t
-    aux <- c(rep(rho_0 * sig2_theta_0, (1 + ord)), rep(0, ord * w), 0)
-    P0 <- cbind(P0, aux)
-    P0 <- rbind(P0, c(aux, sig2_theta_0))  # add covariance of theta_{t-1}^(0)  [approx covariance for (1-omega) theta_{t-1}^(0) + omega theta_{t-1}^(1)]
     
     models[[i]] <- list(dt = ss$dt, Tt = ss$Tt, HHt = ss$HHt, ct = ss$ct,
                         Zt = ss$Zt, GGt = ss$GGt, W = w, a0 = a0, P0 = P0)

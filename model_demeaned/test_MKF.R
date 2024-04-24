@@ -1,5 +1,5 @@
 # first created: 11 Apr 2024
-# last updated: 11 Apr 2024
+# last updated: 24 Apr 2024
 # author: Andreas Uthemann
 
 rm(list=ls())
@@ -9,7 +9,7 @@ library(tictoc)
 
 source('SimulateData_demeaned.R')
 source('LogLike_MKF.R')
-source("InitialParasGuess.R")
+source("InitialParasGuess_demeaned.R")
 source("DrawTypes.R")
 
 seed_sim <- 1
@@ -51,7 +51,7 @@ y_sim <- SimulateDataLagged(S = S, W = W, TT = TT, rho = paras_sim[1],
                             sig_z = paras_sim[6], ord = ord_sim, seed = seed_sim)
 
 # introduce missing values (optional)
-p_miss <- 0.01   # percent of missing observation per submitter
+p_miss <- 0.0   # percent of missing observation per submitter
 miss <- rbinom(S*TT, 1, p_miss)
 miss <- matrix(as.logical(miss), nrow = S)
 
@@ -62,7 +62,7 @@ for (s in 1:40){
 #save(y_sim, paras_sim, seed_sim, file = "data/simdata_paraset1_NAs.RData")
 
 # data-driven guesses for parameters and submitter types
-init <- InitialParas(y_sim)
+init <- InitialParas(y_sim, paras0 = c(rho_sim, NA, sig_u_sim, NA, sig_n_sim, NA))
 
 # calculate log-likelihood at true parameters (mostly test)
 
@@ -115,8 +115,8 @@ scale_mcmc[4,4] <- 0.04  # sig_e
 scale_mcmc[5,5] <- 0.025 # sig_n
 scale_mcmc[6,6] <- 0.005 # sig_z
 
-nbatch_mcmc <- 5
-burnin_mcmc <- 1
+nbatch_mcmc <- 100
+burnin_mcmc <- 10
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
