@@ -1,5 +1,5 @@
 # first created: 17 Apr 2024
-# last updated: 24 Apr 2024
+# last updated: 29 Apr 2024
 # author: Andreas Uthemann
 
 InitialParas <- function(y, paras0 = rep(NA, 6), seed=1){
@@ -12,6 +12,11 @@ InitialParas <- function(y, paras0 = rep(NA, 6), seed=1){
 
   S <- dim(y)[1] - 1  # number of submitters
   TT <- dim(y)[2]     # number of submission periods
+
+  # replace NAs with cross-sectional average (here 0 as data is demeaned)
+  for (i in 2:(S + 1)){
+    y[i, is.na(y[i, ])] <- 0
+  }
 
   # at the moment these parameters have to be provided
   rho_hat <- paras0[1]
