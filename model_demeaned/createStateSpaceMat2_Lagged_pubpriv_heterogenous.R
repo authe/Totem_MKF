@@ -2,7 +2,7 @@ StateSpaceMatLag <- function(ord, rho, omega, sig_u, sig_e, sig_n, tol=1e-15){
   
   # Learning dynamics for "weak" submitters
   # first created: 18 Jul 2022
-  # last updated: 19 Aug 2022
+  # last updated: 19 Aug 2022 (minor edits 10 Jun 2024)
   # author: Andreas Uthemann
 
   # function to create matrices for state-state state space system with beliefs of order ord
