@@ -1,10 +1,11 @@
 # first created: 20 Aug 2023
-# last updated: 11 Feb 2023
+# last updated: 11 Jun 2024
 # author: Andreas Uthemann
 
-ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed = 1){
+ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types = "", seed = 1){
   # transform parameters to unconstrained problem
   # see mcmc R package pdf for logic of ifelse (avoids numerical problems)
+  # path_types points to file to save "surviving" types (ignored by default)
   source("LogLike_MKF.R")
   
   paras <- rep(0, 6)
@@ -13,7 +14,6 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed =
                      exp(par[1]) / (1 + exp(par[1])))
   paras[2] <- ifelse(par[2] > 0, 1 / (1 + exp(-par[2])), 
                      exp(par[2]) / (1 + exp(par[2])))
-  #paras[2] <- W/(dim(yt)[1]-1)
   paras[3] <- ifelse(par[3] > 0, (h + l * exp(-par[3])) / (1 + exp(-par[3])),
                      (l + h * exp(par[3])) / (1 + exp(par[3])))
   paras[4] <- ifelse(par[4] > 0, (h + l * exp(-par[4])) / (1 + exp(-par[4])),
@@ -34,7 +34,6 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed =
                        par[1] - 2 * log1p(exp(par[1])))
   log_jac[2] <- ifelse(par[2] > 0, -log1p(exp(-par[2])) - log1p(exp(par[2])),
                        par[2] - 2 * log1p(exp(par[2])))
-  #log.jac[2] <- 0
   log_jac[3] <- ifelse(par[3] > 0,
                        log(h - l) - log1p(exp(-par[3])) - log1p(exp(par[3])),
                        log(h - l) + par[3] - 2 * log1p(exp(par[3])))
@@ -53,17 +52,14 @@ ll_mcmc <- function(par, y, init, types, ord, crit_eff, l, h, path_types, seed =
 
   # append "surviving" types and their weights wT to list types_mcmc 
   # and save to file path_types
-  if (!file.exists(path_types)) {
-    stop(paste0("File ", path_types, " does not exist."))
-  } else {
+  if (file.exists(path_types)) {
     load(path_types)
     n <- length(types_mcmc) + 1
     print(n)
 
     aux <- list(wT = res$wT, types = res$typesT, LL = ll)
-
     types_mcmc[[n]] <- aux
-
+    
     save(types_mcmc, file = path_types)
   }
   
