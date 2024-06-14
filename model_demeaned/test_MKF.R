@@ -75,7 +75,7 @@ init <- InitialParas(y_sim, paras0 = rep(NA, 6))
 
 M_mkf <- 500 # types draws for MKF
 p_class <- 0.9
-crit_eff <- 0.
+crit_eff <- 0.2
 types_mkf <- DrawTypes(M_mkf, init, p_class)
 
 tic()
@@ -118,8 +118,8 @@ scale_mcmc[4, 4] <- 0.04  # sig_e
 scale_mcmc[5, 5] <- 0.025 # sig_n
 scale_mcmc[6, 6] <- 0.005 # sig_z
 
-nbatch_mcmc <- 10
-burnin_mcmc <- 1
+nbatch_mcmc <- 1000
+burnin_mcmc <- 100
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
