@@ -21,7 +21,7 @@ InitialParas <- function(y, paras0 = rep(NA, 6), seed = 1) {
 
   # at the moment rho have to be provided, otherwise defaults to 0.9
   if (is.na(paras0[1])) {
-    sig_rho_hat <- 0.9
+    rho_hat <- 0.9
   }
 
   # sig_e is the stddev of the demeaned consensus price
