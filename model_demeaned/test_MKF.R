@@ -69,14 +69,13 @@ if (p_miss > 0) {
 #save(y_sim, paras_sim, seed_sim, file = "data/simdata_paraset1_NAs.RData") # nolint
 
 # data-driven guesses for parameters and submitter types
-init <- InitialParas(y_sim,
-                     paras0 = c(rho_sim, NA, sig_u_sim, NA, sig_n_sim, NA))
+init <- InitialParas(y_sim, paras0 = rep(NA, 6))
 
 # calculate log-likelihood at true parameters (mostly test)
 
 M_mkf <- 500 # types draws for MKF
 p_class <- 0.9
-crit_eff <- 0.2
+crit_eff <- 0.
 types_mkf <- DrawTypes(M_mkf, init, p_class)
 
 tic()
