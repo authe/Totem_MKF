@@ -1,5 +1,5 @@
 # first created: 17 Apr 2024
-# last updated: 14 Jun 2024
+# last updated: 15 Jun 2024
 # author: Andreas Uthemann
 
 InitialParas <- function(y, paras0 = rep(NA, 6), seed = 1) {
@@ -22,6 +22,8 @@ InitialParas <- function(y, paras0 = rep(NA, 6), seed = 1) {
   # at the moment rho have to be provided, otherwise defaults to 0.9
   if (is.na(paras0[1])) {
     rho_hat <- 0.9
+  } else {
+    rho_hat <- paras0[1]
   }
 
   # sig_e is the stddev of the demeaned consensus price
