@@ -31,7 +31,8 @@ path_types <- paste0(path_out, "types_mcmc_simdata_paraset1_scale6_seed",
 S <- 40  # number of submitters
 W <- 30  # number of weak submitters
 TT <- 200  # submission dates
-omega_0 <- 0.7  # prior for weak type (needed for drawing W)
+
+ord_sim <- 2
 
 
 rho_sim <- 0.94
@@ -111,8 +112,8 @@ scale_mcmc[3, 3] <- 0.04  # sig_e
 scale_mcmc[4, 4] <- 0.025 # sig_n
 scale_mcmc[5, 5] <- 0.005 # sig_z
 
-nbatch_mcmc <- 100
-burnin_mcmc <- 10
+nbatch_mcmc <- 1000
+burnin_mcmc <- 100
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
