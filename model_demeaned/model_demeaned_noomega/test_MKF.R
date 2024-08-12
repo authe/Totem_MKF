@@ -1,5 +1,5 @@
-# first created: 11 Apr 2024
-# last updated: 12 Jun 2024
+# first created: 12 Aug 2024
+# last updated: 12 Aug 2024
 # author: Andreas Uthemann
 
 rm(list = ls())
@@ -7,7 +7,7 @@ rm(list = ls())
 library(mcmc)
 library(tictoc)
 
-source("SimulateData_demeaned.R")
+source("SimulateData_demeaned_noomega.R")
 source("LogLike_MKF.R")
 source("LogLike_MKF_MCMC.R")
 source("InitialParasGuess_demeaned.R")
@@ -29,30 +29,24 @@ path_types <- paste0(path_out, "types_mcmc_simdata_paraset1_scale6_seed",
 # -------------------------- Simulate data for testing ------------------------
 
 S <- 40  # number of submitters
+W <- 30  # number of weak submitters
 TT <- 200  # submission dates
+omega_0 <- 0.7  # prior for weak type (needed for drawing W)
 
-ord_sim <- 2
 
 rho_sim <- 0.94
-omega_sim <- 0.33 # probability of weak submitter
 sig_u_sim <- 0.09
 sig_e_sim <- 0.01
 sig_n_sim <- 0.09  # 0.09 works fine
 sig_z_sim <- 0.01
 
-paras_sim <- c(rho_sim, omega_sim, sig_u_sim, sig_e_sim, sig_n_sim, sig_z_sim)
-
-# draw W weak submitters out of S with i.i.d. prob omega_sim
-W <- sum(rbinom(S, 1, omega_sim))
-# have a least one weak submitter (code works with 0)
-W <- ifelse(W > 0, W, 1)
+paras_sim <- c(rho_sim, sig_u_sim, sig_e_sim, sig_n_sim, sig_z_sim)
 
 # simulate data (consensus price and S submission time series)
-y_sim <- SimulateDataLagged(S = S, W = W, TT = TT, rho = paras_sim[1],
-                            omega = paras_sim[2], sig_u = paras_sim[3],
-                            sig_e = paras_sim[4], sig_n = paras_sim[5],
-                            sig_z = paras_sim[6], ord = ord_sim,
-                            seed = seed_sim)
+y_sim <- SimulateDataLaggedNoOmega(S = S, W = W, TT = TT, rho = paras_sim[1],
+                                   sig_u = paras_sim[2], sig_e = paras_sim[3],
+                                   sig_n = paras_sim[4], sig_z = paras_sim[5],
+                                   ord = ord_sim, seed = seed_sim)
 
 # introduce missing values (optional)
 p_miss <- 0   # percent of missing observation per submitter
@@ -106,20 +100,19 @@ types <- DrawTypes(M_mkf, init, p_class)
 
 # initial values for parameter estimation
 par_0 <- init$par
-par_0 <- c(log(par_0[1:2] / (1 - par_0[1:2])),
+par_0 <- c(log(par_0[1] / (1 - par_0[1])),
            log((par_0[3:6] - l) / (h - par_0[3:6])))
 
 # MCMC parameters
-scale_mcmc <- diag(6)
+scale_mcmc <- diag(5)
 scale_mcmc[1, 1] <- 0.2   # rho
-scale_mcmc[2, 2] <- 0.1   # omega
-scale_mcmc[3, 3] <- 0.02   # sig_u
-scale_mcmc[4, 4] <- 0.04  # sig_e
-scale_mcmc[5, 5] <- 0.025 # sig_n
-scale_mcmc[6, 6] <- 0.005 # sig_z
+scale_mcmc[2, 2] <- 0.02   # sig_u
+scale_mcmc[3, 3] <- 0.04  # sig_e
+scale_mcmc[4, 4] <- 0.025 # sig_n
+scale_mcmc[5, 5] <- 0.005 # sig_z
 
-nbatch_mcmc <- 1000
-burnin_mcmc <- 100
+nbatch_mcmc <- 100
+burnin_mcmc <- 10
 
 # ----------------- MCMC estimation and processing of results  ----------------
 
@@ -138,21 +131,18 @@ batch_mcmc <- out_mcmc$batch
 
 # chain of rescaled parameters (plot to check burn in phase and mixing of chain) #nolint
 rho_mcmc <- exp(batch_mcmc[, 1]) / (1 + exp(batch_mcmc[, 1]))
-omega_mcmc <- exp(batch_mcmc[, 2]) / (1 + exp(batch_mcmc[, 2]))
-sig_u_mcmc <- (l + h * exp(batch_mcmc[, 3])) / (1 + exp(batch_mcmc[, 3]))
-sig_e_mcmc <- (l + h * exp(batch_mcmc[, 4])) / (1 + exp(batch_mcmc[, 4]))
-sig_n_mcmc <- (l + h * exp(batch_mcmc[, 5])) / (1 + exp(batch_mcmc[, 5]))
-sig_z_mcmc <- (l + h * exp(batch_mcmc[, 6])) / (1 + exp(batch_mcmc[, 6]))
+sig_u_mcmc <- (l + h * exp(batch_mcmc[, 2])) / (1 + exp(batch_mcmc[, 2]))
+sig_e_mcmc <- (l + h * exp(batch_mcmc[, 3])) / (1 + exp(batch_mcmc[, 3]))
+sig_n_mcmc <- (l + h * exp(batch_mcmc[, 4])) / (1 + exp(batch_mcmc[, 4]))
+sig_z_mcmc <- (l + h * exp(batch_mcmc[, 5])) / (1 + exp(batch_mcmc[, 5]))
 
 paras_est <- c(mean(rho_mcmc[burnin_mcmc:nbatch_mcmc]),
-               mean(omega_mcmc[burnin_mcmc:nbatch_mcmc]),
                mean(sig_u_mcmc[burnin_mcmc:nbatch_mcmc]),
                mean(sig_e_mcmc[burnin_mcmc:nbatch_mcmc]),
                mean(sig_n_mcmc[burnin_mcmc:nbatch_mcmc]),
                mean(sig_z_mcmc[burnin_mcmc:nbatch_mcmc]))
 
 paras_est_se <- c(sd(rho_mcmc[burnin_mcmc:nbatch_mcmc]),
-                  sd(omega_mcmc[burnin_mcmc:nbatch_mcmc]),
                   sd(sig_u_mcmc[burnin_mcmc:nbatch_mcmc]),
                   sd(sig_e_mcmc[burnin_mcmc:nbatch_mcmc]),
                   sd(sig_n_mcmc[burnin_mcmc:nbatch_mcmc]),

@@ -1,5 +1,5 @@
-# first created: 24 Apr 2024
-# last updated: 10 Jun 2024
+# first created: 12 Aug 2024
+# last updated: 12 Aug 2024
 # author: Andreas Uthemann
 
 
@@ -19,11 +19,10 @@ MakeModels <- function(y, types, paras, init, ord){
   
   # model parameters
   rho <- paras[1]
-  omega <- paras[2]
-  sig_u <- paras[3]
-  sig_e <- paras[4]
-  sig_n <- paras[5]
-  sig_z <- paras[6]
+  sig_u <- paras[2]
+  sig_e <- paras[3]
+  sig_n <- paras[4]
+  sig_z <- paras[5]
   
   
   # data-based parameter values used to set "reasonable" data-driven priors (a0,P0) for the initial state 
@@ -52,6 +51,7 @@ MakeModels <- function(y, types, paras, init, ord){
 
   for (i in 1:length(size_models)){
     w <- size_models[i]
+    omega <- w/S  # fraction of weak submitters (weight in consensus price)
     ss <- SP_model_demeaned(rho = rho, omega = omega, sig_u = sig_u, sig_e = sig_e, 
                             sig_n = sig_n, sig_z = sig_z, ord = ord, tol = 1e-15, S = S, W = w)
     

@@ -1,10 +1,10 @@
-SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n,
-                               sig_z = 0, ord, seed = 1, tol = 1e-15) {
+SimulateDataLaggedNoOmega <- function(S, W, TT, rho, sig_u, sig_e, sig_n,
+                                       sig_z = 0, ord, seed = 1, tol = 1e-15) {
 
   # code to simulate submissions for S submitters and belief order ord
 
-  # first created: 10 Apr 2020
-  # last modified: 11 Jun 2024
+  # first created: 12 Aug 2024
+  # last modified: 12 Aug 2024
   # author: Andreas Uthemann
 
   # import function to create state space system
@@ -23,6 +23,8 @@ SimulateDataLagged <- function(S, W, TT, rho, omega, sig_u, sig_e, sig_n,
   # sig.n <- 0.09   # sd of noise shock n_(j,t) to private signal of weak submitters j: s_(j,t) = theta_t^(0) + n_(j,t) # nolint
   # sig.z <- 0.01      # sd of measurement error for individual submissions # nolint
   # ord <- 2       # order of weak submitters' average belief hierachy theta_t = (theta_t^(0),theta_t^(1),...,theta_t^(ord)) # nolint
+
+  omega <- W/S
 
   # get matrices for state space system
   SSMat <- StateSpaceMatLag(ord = ord, rho = rho, omega = omega, sig_u = sig_u,

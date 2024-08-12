@@ -1,9 +1,9 @@
 # first created: 20 Aug 2023
-# last updated: 9 Nov 2023
+# last updated: 12 Aug 2024
 # author: Andreas Uthemann
 
 # main program for MCMC estimation of MKF
-rm(list=ls())
+rm(list = ls())
 
 library(mcmc)
 library(tictoc)
@@ -25,10 +25,10 @@ data_file <- paste0("estdata_", ind, "Term", term, "Strike", strike,
 
 path_out <- "results/"
 outfile <- paste0("results_mcmc_", ind, "Term", term, "Strike", strike, opttyp,
-                    "_Seed", seed, ".RData")
+                   "_Seed", seed, ".RData")
 # output file for posterior weights wT of MCMC
 path_types <- paste0(path_out, "types_mcmc_", ind, "Term", term, "Strike",
-                    strike, opttyp, "_Seed", seed, ".RData")
+                     strike, opttyp, "_Seed", seed, ".RData")
 
 
 # -------------------- load data for estimation -------------------------------                    
@@ -70,18 +70,16 @@ h <- 1  # upper bound
 
 # initial values for parameter estimation
 par_0 <- init$par
-par_0 <- c(log(par_0[1:2] / (1- par_0[1:2])), 
-           log((par_0[3:6] - l) / (h - par_0[3:6]))) 
+par_0 <- c(log(par_0[1] / (1 - par_0[1])), 
+           log((par_0[3:6] - l) / (h - par_0[3:6])))
 
 # MCMC parameters
-scale_mcmc <- diag(6) * 0.01   # (h=5) 0.1 -> 0.066, 0.01 -> 0.1, 0.005 -> 0.066, 1 -> 0
-# 0.1 (rho,ome) 0.01 -> 0.13
+scale_mcmc <- diag(5) * 0.01   # (h=5) 0.1 -> 0.066, 0.01 -> 0.1, 0.005 -> 0.066, 1 -> 0
 scale_mcmc[1,1] <- 0.2   # rho
-scale_mcmc[2,2] <- 0.2   # omega
-#scale_mcmc[3,3] <- 0.02   # sig_u
-#scale_mcmc[4,4] <- 0.0005  # sig_e 0.0001 bad
-#scale_mcmc[5,5] <- 0.002 # sig_n
-#scale_mcmc[6,6] <- 0.002 # sig_z
+#scale_mcmc[2,2] <- 0.02   # sig_u
+#scale_mcmc[3,3] <- 0.0005  # sig_e 0.0001 bad
+#scale_mcmc[4,4] <- 0.002 # sig_n
+#scale_mcmc[5,5] <- 0.002 # sig_z
 
 nbatch_mcmc <- 30
 burnin_mcmc <- 10
@@ -104,32 +102,29 @@ acc_prob <- out_mcmc$accept
 batch_mcmc <- out_mcmc$batch
 
 # chain of rescaled parameters (plot to check burn in phase and mixing of chain) 
-rho_mcmc <- exp(batch_mcmc[,1]) / (1 + exp(batch_mcmc[,1]))
-omega_mcmc <- exp(batch_mcmc[,2]) / (1 + exp(batch_mcmc[,2]))
-sig_u_mcmc <- (l + h * exp(batch_mcmc[,3])) / (1 + exp(batch_mcmc[,3]))
-sig_e_mcmc <- (l + h * exp(batch_mcmc[,4])) / (1 + exp(batch_mcmc[,4]))
-sig_n_mcmc <- (l + h * exp(batch_mcmc[,5])) / (1 + exp(batch_mcmc[,5]))
-sig_z_mcmc <- (l + h * exp(batch_mcmc[,6])) / (1 + exp(batch_mcmc[,6]))
+rho_mcmc <- exp(batch_mcmc[, 1]) / (1 + exp(batch_mcmc[, 1]))
+sig_u_mcmc <- (l + h * exp(batch_mcmc[, 2])) / (1 + exp(batch_mcmc[, 2]))
+sig_e_mcmc <- (l + h * exp(batch_mcmc[, 3])) / (1 + exp(batch_mcmc[, 3]))
+sig_n_mcmc <- (l + h * exp(batch_mcmc[, 4])) / (1 + exp(batch_mcmc[, 4]))
+sig_z_mcmc <- (l + h * exp(batch_mcmc[, 5])) / (1 + exp(batch_mcmc[, 5]))
 
-paras_est <- c(mean(rho_mcmc[burnin_mcmc:nbatch_mcmc]), 
-               mean(omega_mcmc[burnin_mcmc:nbatch_mcmc]), 
+paras_est <- c(mean(rho_mcmc[burnin_mcmc:nbatch_mcmc]),
                mean(sig_u_mcmc[burnin_mcmc:nbatch_mcmc]),
-               mean(sig_e_mcmc[burnin_mcmc:nbatch_mcmc]), 
-               mean(sig_n_mcmc[burnin_mcmc:nbatch_mcmc]), 
+               mean(sig_e_mcmc[burnin_mcmc:nbatch_mcmc]),
+               mean(sig_n_mcmc[burnin_mcmc:nbatch_mcmc]),
                mean(sig_z_mcmc[burnin_mcmc:nbatch_mcmc]))
 
-paras_est_se <- c(sd(rho_mcmc[burnin_mcmc:nbatch_mcmc]), 
-                  sd(omega_mcmc[burnin_mcmc:nbatch_mcmc]), 
+paras_est_se <- c(sd(rho_mcmc[burnin_mcmc:nbatch_mcmc]),
                   sd(sig_u_mcmc[burnin_mcmc:nbatch_mcmc]),
-                  sd(sig_e_mcmc[burnin_mcmc:nbatch_mcmc]), 
-                  sd(sig_n_mcmc[burnin_mcmc:nbatch_mcmc]), 
+                  sd(sig_e_mcmc[burnin_mcmc:nbatch_mcmc]),
+                  sd(sig_n_mcmc[burnin_mcmc:nbatch_mcmc]),
                   sd(sig_z_mcmc[burnin_mcmc:nbatch_mcmc]))
 
 results_mcmc <- list(out_mcmc, paras_est, paras_est_se, seed,
-                    init, scale_mcmc, LL_spec)
+                     init, scale_mcmc, LL_spec)
 
 names(results_mcmc) <- c("out_mcmc", "paras_est", "para_est_se",
-                        "seed", "init", "scale_mcmc", "LL_spec")
+                         "seed", "init", "scale_mcmc", "LL_spec")
 
 # --------------------------- save results ------------------------------------
 
