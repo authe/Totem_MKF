@@ -2,7 +2,7 @@ StateSpaceMatLag <- function(ord, rho, omega, sig_u, sig_e, sig_n, tol=1e-15){
   
   # Learning dynamics for "weak" submitters
   # first created: 18 Jul 2022
-  # last updated: 19 Aug 2022 (minor edits 10 Jun 2024)
+  # last updated: 25 Sep 2024
   # author: Andreas Uthemann
 
   # function to create matrices for state-state state space system with beliefs of order ord
@@ -41,6 +41,7 @@ StateSpaceMatLag <- function(ord, rho, omega, sig_u, sig_e, sig_n, tol=1e-15){
   P <- matrix( sig_u^2 / (1- rho^2), nrow = 1)
   
   ########################## ITERATE to get transition matrices with next higher order of beliefs  ######################
+
   
   for (k in 1:ord){
     
@@ -66,6 +67,7 @@ StateSpaceMatLag <- function(ord, rho, omega, sig_u, sig_e, sig_n, tol=1e-15){
     
     # record old values (output for individual transition matrices)
     A_old <- A
+    C_old <- C
     D1_old <- D1
     D2_old <- D2
     KK_old <- KK
@@ -109,13 +111,14 @@ StateSpaceMatLag <- function(ord, rho, omega, sig_u, sig_e, sig_n, tol=1e-15){
     count <- count + 1
     
   }
-  
+
+
   # calculate matrices for individual deviations from theta_t
   # x_{j,t} = Q_k x_{j,t-1} + V_k eta_{j,t}
   
   Q <- A_old - KK_old %*% (D1_old %*% A_old + D2_old)
   V <- matrix(sig_n * KK_old[,1], ncol = 1)
-  
+
   ###############################   return results    ####################################################
   
   KalMat <- list()
@@ -124,6 +127,7 @@ StateSpaceMatLag <- function(ord, rho, omega, sig_u, sig_e, sig_n, tol=1e-15){
   KalMat$"PP" <- PP
   KalMat$"KK" <- KK_old
   KalMat$"M_ind" <- A_old
+  KalMat$"N_ind" <- matrix(C_old[,1:2], ncol = 2)
   KalMat$"D1" <- D1_old
   KalMat$"D2" <- D2_old
   KalMat$"Q" <- Q

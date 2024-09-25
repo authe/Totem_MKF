@@ -4,7 +4,7 @@ SimulateDataLaggedNoOmega <- function(S, W, TT, rho, sig_u, sig_e, sig_n,
   # code to simulate submissions for S submitters and belief order ord
 
   # first created: 12 Aug 2024
-  # last modified: 12 Aug 2024
+  # last modified: 25 Sep 2024
   # author: Andreas Uthemann
 
   # import function to create state space system
@@ -36,44 +36,49 @@ SimulateDataLaggedNoOmega <- function(S, W, TT, rho, sig_u, sig_e, sig_n,
 
   # draw time series of aggregate shocks w
   w <- mvrnorm(TT + 1, rep(0, 2), diag(2))
+
   # draw initial condition using prior N(0,PP)
-  theta0 <- mvrnorm(1, rep(0, ord + 1), SSMat$PP)
+  theta0 <- mvrnorm(1, rep(0, ord), SSMat$PP[1:ord, 1:ord])
   theta <- theta0
 
   aux <- theta0
   for (t in 2:(TT + 1)){
-    aux <- SSMat$M %*% aux + SSMat$N %*% w[t, ]
+    aux <- SSMat$M_ind %*% aux + SSMat$N_ind %*% w[t, ]
     theta <- rbind(theta, t(aux))
   }
 
-  ###### simulate time series for individual submissions
 
   # generate consensus price p_t = (1-omega) theta^(0)_{t-1} + omega theta^(1)_{t-1} + sig.e e_t #nolint
-  price <- (1 - omega) * theta[(1:TT), 1] + omega * theta[(1:TT), 2] +
-    sig_e * w[2:(TT + 1), 2]
+  if (ord > 1){
+    price <- (1 - omega) * theta[(1:TT), 1] + omega * theta[(1:TT), 2] +
+      sig_e * w[2:(TT + 1), 2]
+    } else{
+      price <- theta[(1:TT), 1] + sig_e * w[2:(TT + 1), 2]
+  }
 
   price <- c(0, price)
+
 
   # generate beliefs for W "weak" submitters
   beliefs <- list()
 
   for (s in 1:W){
-
-    y0 <- mvrnorm(1, rep(0, ord + 1), SSMat$PP)
-    y0 <- y0[2:(ord + 1)]  # initial individual beliefs
+    
+    y0 <- mvrnorm(1, rep(0, ord), SSMat$PP[1:ord, 1:ord])
+    y0 <- y0[1:ord]  # initial individual beliefs
     y <- y0
-
+    
     aux <- y0
     for (t in 2:(TT + 1)){
-
+      
       priv_signal <- theta[t, 1] + sig_n * rnorm(1)
       signals <- matrix(c(priv_signal, price[t]), nrow = 2)
-
+      
       aux <- SSMat$M_ind %*% aux + SSMat$KK %*%
         (signals - SSMat$D1 %*% SSMat$M_ind %*% aux - SSMat$D2 %*% aux)
       y <- rbind(y, t(aux))
     }
-
+    
     beliefs[[s]] <- y[1:(TT + 1), ]
   }
 
@@ -82,14 +87,18 @@ SimulateDataLaggedNoOmega <- function(S, W, TT, rho, sig_u, sig_e, sig_n,
 
   # each "weak" submitter j=1,...,W submits his best estimate theta_{j,t}^(1) 
   for (s in 1:W){
-    submissions <- cbind(submissions, beliefs[[s]][1:(TT + 1), 1])
+    if (ord > 1){
+      submissions <- cbind(submissions, beliefs[[s]][1:(TT + 1), 1])
+    } else{
+      submissions <- cbind(submissions, beliefs[[s]][1:(TT + 1)])
+    }
   }
 
   # each "strong" submitter j=1,...,W submits the fundamental theta_{j,t}^(0) plus measurement error #nolint
   if (W < S) {
     for (s in (W + 1):S){
       submissions <- cbind(submissions,
-                           theta[1:(TT + 1), 1] + sig_z * rnorm(TT + 1))
+                          theta[1:(TT + 1), 1] + sig_z * rnorm(TT + 1))
     }
   }
 
